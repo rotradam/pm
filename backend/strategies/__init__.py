@@ -17,6 +17,10 @@ from skfolio.optimization import MeanRisk
 
 # Strategy Registry
 # Maps strategy ID to strategy class
+from .waeg import WAEGStrategy
+
+# Strategy Registry
+# Maps strategy ID to strategy class
 STRATEGY_REGISTRY = {
     # Baseline strategies
     'EW': EqualWeight,
@@ -26,6 +30,7 @@ STRATEGY_REGISTRY = {
     # Momentum strategies
     'EG': ExponentialGradient,
     'UP': UniversalPortfolio,
+    'WAEG': WAEGStrategy,
     
     # Mean reversion strategies
     'OLMAR': OLMAR,
@@ -134,7 +139,7 @@ def get_strategies_by_type(strategy_type: str):
     """
     type_mapping = {
         'baseline': ['EW', 'BAH', 'CRP'],
-        'momentum': ['EG', 'UP'],
+        'momentum': ['EG', 'UP', 'WAEG'],
         'mean_reversion': ['OLMAR', 'PAMR'],
     }
     
@@ -160,6 +165,7 @@ __all__ = [
     'ConstantRebalancedPortfolio',
     'ExponentialGradient',
     'UniversalPortfolio',
+    'WAEGStrategy',
     'OLMAR',
     'PAMR',
     'DTC',

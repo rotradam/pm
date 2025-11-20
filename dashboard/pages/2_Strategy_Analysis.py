@@ -48,6 +48,7 @@ def get_default_strategy_config(strategy_id, initial_capital=10000):
         # Momentum
         'EG': {'eta': 0.05, 'update_rule': 'MU'},
         'UP': {'n_experts': 20, 'aggregation': 'hist_performance'},
+        'WAEG': {'k': 20, 'eta_min': 0.01, 'eta_max': 0.2, 'alpha': 0.0},
         
         # Mean Reversion
         'OLMAR': {'reversion_method': 1, 'epsilon': 10.0, 'window': 5},
