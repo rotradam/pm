@@ -3,20 +3,20 @@ IE00B4L5Y983,iShares Core MSCI World UCITS ETF,IWDA.AS,Global Equity (Developed 
 IE00B44Z5B48,SPDR MSCI ACWI UCITS ETF,SPYY.DE,Global Equity (All Country World)
 IE00B5BMR087,iShares Core S&P 500 UCITS ETF,CSSPX.SW,US Equity (Large Cap)
 IE00B4K48X80,iShares Core MSCI Europe UCITS ETF,IMAE.AS,European Equity (Developed Europe)
-DE0005933931,iShares Core DAX UCITS ETF (DE),DAXEX.DE,German Equity (DAX 40 Index)
+DE0005933931,iShares Core DAX UCITS ETF (DE),EXS1.DE,German Equity (DAX 40 Index)
 IE00B53HP851,iShares Core FTSE 100 UCITS ETF,CSUKX.SW,UK Equity (FTSE 100 Index)
 IE00BKM4GZ66,iShares Core MSCI EM IMI UCITS ETF,EMIM.L,Emerging Markets Equity (All Cap)
 IE00BJZ2DD79,Xtrackers Russell 2000 UCITS ETF 1C,XRS2.DE,US Small-Cap Equity (Russell 2000)
 IE00B1FZS350,iShares Dev. Markets Property Yield ETF,IQQ6.DE,Global Real Estate (REITs)
 IE00B0RGQH00,iShares S&P Global Tech Sector ETF,QDVE.DE,Technology Sector (Global)
 IE00BM67HQ30,Xtrackers MSCI World Health Care ETF,XDWU.DE,Healthcare Sector (Global)
-IE00BM66BW21,Xtrackers MSCI World Financials ETF,XMFS.DE,Financials Sector (Global)
+IE00BM66BW21,Xtrackers MSCI World Financials ETF,XDWF.DE,Financials Sector (Global)
 IE00BM67HW99,Xtrackers MSCI World Energy ETF,XDPE.DE,Energy Sector (Global)
 IE00B0M62Q58,iShares Global Materials UCITS ETF,IDWR.L,Materials Sector (Global)
 IE00BYTRRH56,SPDR MSCI World Utilities UCITS ETF,WUTI.AS,Utilities Sector (Global)
-DE000A0F5UH1,iShares STOXX Global Select Dividend 100,SDGPEX.DE,Dividend Stocks (Global High Yield)
-DE0002635299,iShares STOXX Europe Select Dividend 30,SD3PEX.DE,Dividend Stocks (Europe High Yield)
-DE0002635273,iShares DivDAX UCITS ETF (DE),DDAXKEX.DE,Dividend Stocks (Germany High Yield)
+DE000A0F5UH1,iShares STOXX Global Select Dividend 100,ISPA.DE,Dividend Stocks (Global High Yield)
+DE0002635299,iShares STOXX Europe Select Dividend 30,EXSH.DE,Dividend Stocks (Europe High Yield)
+DE0002635273,iShares DivDAX UCITS ETF (DE),EXSB.DE,Dividend Stocks (Germany High Yield)
 IE00BGV5VN51,Xtrackers Artificial Intelligence & Big Data,XAIX.DE,Artificial Intelligence Theme
 IE00BGBN6P67,Invesco CoinShares Global Blockchain ETF,BCHN.L,Blockchain Technology Theme
 IE00BYXG2H39,iShares Nasdaq US Biotechnology UCITS ETF,BTEK.L,Biotechnology Theme (US-focused)
@@ -35,10 +35,22 @@ IE00B4X9L533,iShares Core Global Aggregate Bond ETF,HMWD.L,Global Aggregate Bond
 IE00B5M4WH52,iShares J.P. Morgan EM Local Govt Bond ETF,SEML.L,EM Government Bonds (Local Currency)
 IE00B3F81R35,iShares Core € Corporate Bond UCITS ETF,EUN5.DE,Euro Corporate Bonds (Investment Grade)
 IE00B3B8PX14,iShares Global Inflation-Linked Bond ETF,IUS5.DE,Global Inflation-Linked Bonds
-DE000A0H0728,iShares Diversified Commodity Swap ETF,DJCOMEX.DE,Broad Commodities Index
+DE000A0H0728,iShares Diversified Commodity Swap ETF,EXXY.DE,Broad Commodities Index
 DE000A0S9GB0,Xetra-Gold (Physical Gold ETC),4GLD.DE,Gold (Physical Holding)
 JE00B1VS3333,WisdomTree Physical Silver ETC,PHAG.L,Silver (Physical Holding)
 JE00B78CGV99,WisdomTree Brent Crude Oil ETC,BRNT.L,Crude Oil (Commodity)
 GB00B15KXQ89,WisdomTree Copper ETC,COPA.L,Copper (Industrial Metal)
 JE00BN7KB664,WisdomTree Wheat ETC,WEAT.L,Wheat (Agricultural Commodity)
 JE00BP2PWW32,WisdomTree Carbon ETC,CARB.L,Carbon Emissions (Allowance Futures)
+CRYPTO.BTC,Bitcoin (BTC),BTC-USD,Cryptocurrency
+CRYPTO.ETH,Ethereum (ETH),ETH-USD,Cryptocurrency
+COMM.OIL,Crude Oil Futures,CL=F,Commodities
+COMM.GOLD,Gold Futures,GC=F,Commodities
+COMM.PLAT,Platinum Futures,PL=F,Commodities
+US0378331005,Apple Inc.,AAPL,US Equity (Large Cap)
+US5949181045,Microsoft Corp.,MSFT,US Equity (Large Cap)
+US02079K3059,Alphabet Inc. (Class A),GOOGL,US Equity (Large Cap)
+US0231351067,Amazon.com Inc.,AMZN,US Equity (Large Cap)
+US67066G1040,NVIDIA Corp.,NVDA,US Equity (Large Cap)
+US4642871000,iShares TIPS Bond ETF,TIP,US Government Bonds (Inflation-Protected)
+US4642874329,iShares 20+ Year Treasury Bond ETF,TLT,US Government Bonds (Long-Term)

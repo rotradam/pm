@@ -24,7 +24,13 @@ st.sidebar.header("Configuration")
 @st.cache_data
 def load_data():
     try:
-        return pd.read_parquet('data/processed/prices_2015-01-01_2025-11-16.parquet')
+        processed_dir = Path("data/processed")
+        price_files = list(processed_dir.glob("prices_*.parquet"))
+        if not price_files:
+            return None
+        # Sort by modification time, newest first
+        latest_file = sorted(price_files, key=lambda p: p.stat().st_mtime, reverse=True)[0]
+        return pd.read_parquet(latest_file)
     except:
         return None
 

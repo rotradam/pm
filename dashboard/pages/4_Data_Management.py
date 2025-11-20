@@ -30,12 +30,18 @@ with col1:
     try:
         # This is a bit of a hack to get stats without loading everything
         # In a real app, we'd have a metadata file
-        prices_path = Path("data/processed/prices_2015-01-01_2025-11-16.parquet")
-        if prices_path.exists():
-            df = pd.read_parquet(prices_path)
+        # Find the latest prices file
+        processed_dir = Path("data/processed")
+        price_files = list(processed_dir.glob("prices_*.parquet"))
+        
+        if price_files:
+            # Sort by modification time, newest first
+            latest_file = sorted(price_files, key=lambda p: p.stat().st_mtime, reverse=True)[0]
+            df = pd.read_parquet(latest_file)
             st.metric("Total Assets", len(df.columns))
             st.metric("Date Range", f"{df.index.min().date()} to {df.index.max().date()}")
             st.metric("Total Days", len(df))
+            st.caption(f"Source: {latest_file.name}")
         else:
             st.warning("No processed data found.")
     except Exception as e:

@@ -42,3 +42,15 @@ JE00B78CGV99,A1N49M,WisdomTree Brent Crude Oil ETC,Crude Oil (Commodity),Satelli
 GB00B15KXQ89,A0KRKR,WisdomTree Copper ETC,Copper (Industrial Metal),Satellite,Jersey,USD,n/a (futures),Tracks Copper futures (industrial metal exposure for diversification)
 JE00BN7KB664,A3G8J7,WisdomTree Wheat ETC,Wheat (Agricultural Commodity),Satellite,Jersey,USD,n/a (futures),Tracks Wheat futures (agricultural commodity exposure)
 JE00BP2PWW32,A3GTR6,WisdomTree Carbon ETC,Carbon Emissions (Allowance Futures),Satellite,Jersey,EUR,n/a (futures),Tracks the price of carbon emission allowances (EU carbon credits; climate hedge)
+CRYPTO.BTC,n/a,Bitcoin (BTC),Cryptocurrency,Satellite,Global,USD,n/a,Digital currency
+CRYPTO.ETH,n/a,Ethereum (ETH),Cryptocurrency,Satellite,Global,USD,n/a,Smart contract platform
+COMM.OIL,n/a,Crude Oil Futures,Commodities,Hedge,Global,USD,n/a,Energy commodity
+COMM.GOLD,n/a,Gold Futures,Commodities,Hedge,Global,USD,n/a,Precious metal
+COMM.PLAT,n/a,Platinum Futures,Commodities,Hedge,Global,USD,n/a,Precious metal
+US0378331005,865985,Apple Inc.,US Equity (Large Cap),Satellite,USA,USD,Distributing,Technology hardware
+US5949181045,870747,Microsoft Corp.,US Equity (Large Cap),Satellite,USA,USD,Distributing,Software & Cloud
+US02079K3059,A14Y6H,Alphabet Inc. (Class A),US Equity (Large Cap),Satellite,USA,USD,n/a,Search & Advertising
+US0231351067,906866,Amazon.com Inc.,US Equity (Large Cap),Satellite,USA,USD,n/a,E-commerce & Cloud
+US67066G1040,918422,NVIDIA Corp.,US Equity (Large Cap),Satellite,USA,USD,Distributing,Semiconductors
+US4642871000,n/a,iShares TIPS Bond ETF,US Government Bonds (Inflation-Protected),Hedge,USA,USD,Distributing,Inflation protection
+US4642874329,n/a,iShares 20+ Year Treasury Bond ETF,US Government Bonds (Long-Term),Hedge,USA,USD,Distributing,Long duration treasury
