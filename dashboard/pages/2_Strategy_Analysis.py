@@ -92,6 +92,13 @@ selected_strategy_name = st.sidebar.selectbox("Select Strategy", strategy_names)
 selected_strategy_info = next(s for s in strategies if s['name'] == selected_strategy_name)
 strategy_id = selected_strategy_info['id']
 
+# Check for look-ahead bias
+if selected_strategy_info.get('strategy_type') == 'benchmark_lookahead':
+    st.warning(
+        "⚠️ **Look-Ahead Bias Warning**: This strategy uses future data (hindsight) to determine optimal weights. "
+        "It cannot be implemented in real-time trading and serves only as a theoretical benchmark."
+    )
+
 # Parameters
 st.sidebar.subheader("Parameters")
 initial_capital = st.sidebar.number_input("Initial Capital", value=10000, step=1000)
