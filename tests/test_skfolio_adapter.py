@@ -5,7 +5,7 @@ import numpy as np
 from skfolio.optimization import MeanRisk
 
 # Add backend to path
-sys.path.append(str(Path(__file__).parent))
+sys.path.append(str(Path(__file__).parent.parent))
 
 from backend.strategies.skfolio_adapter import SkfolioAdapter
 
