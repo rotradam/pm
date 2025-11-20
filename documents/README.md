@@ -1,0 +1,220 @@
+# Documents Directory
+
+**Last Updated**: 2025-11-16  
+**Status**: ✅ Clean
+
+## Files
+
+### `etf_universe_full_clean.csv`
+
+**Purpose**: Master list of all tradeable instruments for the OLPS platform
+
+**Status**: ✅ Production-ready (cleaned of duplicates)
+
+**Format**: CSV with columns:
+- `sector`: Asset class / category (e.g., "Global Equity", "Precious Metals")
+- `name`: Full ETF/ETC name
+- `isin`: International Securities Identification Number (primary key)
+- `wkn`: German Securities Code (Wertpapierkennnummer)
+- `notes`: Additional info / description
+- `ticker`: Yahoo Finance ticker symbol (added by ISIN resolver)
+
+**Size**: 9,180 bytes
+
+**Rows**: 97 instruments (deduplicated from original 120)
+
+**Unique ISINs**: 90 (some ISINs have multiple share classes)
+
+**Coverage by Sector**:
+- Global Equity: 5
+- US Equity: 5
+- Europe Equity: 5
+- EM Equity: 5
+- Small Cap Equity: 4
+- Real Estate: 4
+- Bonds: 10
+- Commodities: 5
+- Precious Metals: 9
+- Energy: 5
+- Technology: 5
+- Healthcare: 5
+- Financials: 5
+- Clean Energy: 7
+- ESG: 5
+- Others: 8
+
+## Usage
+
+### Load Universe in Python
+
+```python
+from backend.data.universe import Universe
+
+universe = Universe()
+df = universe.get_all()  # All 97 instruments
+print(df.head())
+
+# Filter by sector
+equity = universe.filter_by_sector(["Global Equity", "US Equity"])
+print(f"Equity instruments: {len(equity)}")
+```
+
+### Load Directly with Pandas
+
+```python
+import pandas as pd
+
+df = pd.read_csv("documents/etf_universe_full_clean.csv")
+
+# Check for duplicates
+duplicates = df[df.duplicated(subset=['isin'], keep=False)]
+if len(duplicates) > 0:
+    print(f"Warning: {len(duplicates)} duplicate ISINs found!")
+else:
+    print("✅ No duplicates")
+
+# Get list of tickers
+tickers = df['ticker'].dropna().tolist()
+print(f"Mapped tickers: {len(tickers)}")
+```
+
+## Maintenance
+
+### When to Update This File
+
+1. **Add new instruments**: Append rows with new ISINs
+2. **Remove instruments**: Delete rows for delisted/unwanted products
+3. **Update tickers**: Re-run ISIN resolution if tickers change
+4. **Fix errors**: Correct names, sectors, or notes as needed
+
+### Adding New Instruments
+
+```bash
+# 1. Add rows to CSV manually (without ticker column)
+# 2. Run ISIN resolver to populate tickers
+python scripts/resolve_isins_openfigi.py
+
+# 3. Verify mapping
+python -c "import pandas as pd; df=pd.read_csv('documents/etf_universe_full_clean.csv'); print(df[df['ticker'].isna()])"
+
+# 4. Download price data for new instruments
+python scripts/download_data.py
+```
+
+### Removing Duplicates
+
+If duplicates appear again:
+
+```python
+import pandas as pd
+
+df = pd.read_csv("documents/etf_universe_full_clean.csv")
+df_clean = df.drop_duplicates(subset=['isin', 'name', 'sector'], keep='first')
+df_clean.to_csv("documents/etf_universe_full_clean.csv", index=False)
+print(f"Removed {len(df) - len(df_clean)} duplicates")
+```
+
+## Data Quality Checks
+
+### Required Checks Before Using
+
+```python
+import pandas as pd
+
+df = pd.read_csv("documents/etf_universe_full_clean.csv")
+
+# 1. Check for missing critical fields
+print("Missing ISINs:", df['isin'].isna().sum())
+print("Missing names:", df['name'].isna().sum())
+print("Missing sectors:", df['sector'].isna().sum())
+
+# 2. Check ticker mapping coverage
+print(f"Mapped tickers: {df['ticker'].notna().sum()}/{len(df)} ({df['ticker'].notna().sum()/len(df)*100:.1f}%)")
+
+# 3. Check for invalid ISINs (should be 12 chars)
+invalid_isins = df[df['isin'].str.len() != 12]
+if len(invalid_isins) > 0:
+    print(f"Warning: {len(invalid_isins)} invalid ISINs!")
+
+# 4. List unmapped instruments
+unmapped = df[df['ticker'].isna()][['isin', 'name', 'sector']]
+if len(unmapped) > 0:
+    print("\nUnmapped instruments:")
+    print(unmapped)
+```
+
+## Historical Changes
+
+### 2025-11-16: Major Cleanup
+
+- **Before**: 120 rows (40 duplicates)
+- **After**: 97 rows (deduplicated)
+- **Action**: Removed exact duplicate rows (same ISIN + name + sector)
+- **Tickers**: Added via OpenFIGI API (85% success rate)
+
+### Duplicate Analysis
+
+40 duplicate rows were removed (23 distinct ISINs duplicated):
+- Some duplicates were different share classes (distributing vs accumulating)
+- Some were listing duplicates on different exchanges
+- Some were data entry errors
+
+**Decision**: Kept first occurrence of each ISIN+name+sector combination
+
+## Column Specifications
+
+| Column | Type | Required | Description | Example |
+|--------|------|----------|-------------|---------|
+| `sector` | string | ✅ | Asset class / sector | "Global Equity" |
+| `name` | string | ✅ | Full ETF name | "iShares Core MSCI World UCITS ETF" |
+| `isin` | string (12) | ✅ | ISIN code | "IE00B4L5Y983" |
+| `wkn` | string (6) | ❌ | German securities code | "A0RPWH" |
+| `notes` | string | ❌ | Additional info | "Developed World, standard core" |
+| `ticker` | string | ⚠️ | Yahoo Finance ticker | "IWDA.AS" |
+
+**Note**: `ticker` column is auto-generated by ISIN resolver, not manually maintained
+
+## Known Issues
+
+### Unmapped ISINs (18 instruments)
+
+These ISINs couldn't be mapped via OpenFIGI (mostly US ETFs):
+
+1. IE00BLCHJP11 - Global X Lithium & Battery Tech UCITS ETF
+2. IE00BMFNWC33 - HANetf Solares Clean Energy ETF
+3. IE00BJKWYL67 - VanEck Low Carbon Energy ETF
+4. GB00BMXNNW35 - WisdomTree Battery Metals ETC
+5. (14 more - see OpenFIGI resolution log)
+
+**Action Required**: Manual research on Yahoo Finance to find correct tickers
+
+### Delisted Tickers (3)
+
+These tickers are mapped but have no price data (delisted):
+
+1. SXXPIEX.DE (iShares STOXX Europe 600)
+2. XBLC.DE (Xtrackers EUR Corporate Bond)
+3. DJCOMEX.DE (iShares Diversified Commodity)
+
+**Action Required**: Find replacement ISINs or remove from universe
+
+## Git Workflow
+
+```bash
+# This file should be committed to git
+git add documents/etf_universe_full_clean.csv
+git commit -m "chore: update universe with new instruments"
+```
+
+**Important**: Always commit this file after making changes so team has latest universe
+
+## Next Steps
+
+1. ⏳ Manually map remaining 18 unmapped ISINs
+2. ⏳ Replace 3 delisted tickers with current equivalents
+3. ✅ All other 69 instruments ready for backtesting
+
+---
+
+**Maintainer**: Data Team  
+**Review Frequency**: Quarterly (or when adding new instruments)

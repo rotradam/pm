@@ -1,0 +1,44 @@
+isin,wkn,name,sector,role,domicile,currency,accumulating_distributing,notes
+IE00B4L5Y983,A0RPWH,iShares Core MSCI World UCITS ETF,Global Equity (Developed World),Core,Ireland,USD,Accumulating,Broad developed market equity index (MSCI World)
+IE00B44Z5B48,A1JJTC,SPDR MSCI ACWI UCITS ETF,Global Equity (All Country World),Core,Ireland,USD,Distributing,Covers developed & emerging markets in one fund (MSCI ACWI)
+IE00B5BMR087,A0YEDG,iShares Core S&P 500 UCITS ETF,US Equity (Large Cap),Core,Ireland,USD,Accumulating,Tracks the S&P 500 index (U.S. blue-chip stocks)
+IE00B4K48X80,A0RPWG,iShares Core MSCI Europe UCITS ETF,European Equity (Developed Europe),Core,Ireland,EUR,Accumulating,Broad Europe equity portfolio (large/mid-cap MSCI Europe)
+DE0005933931,593393,iShares Core DAX UCITS ETF (DE),German Equity (DAX 40 Index),Satellite,Germany,EUR,Accumulating,Tracks the DAX – 40 largest German companies; **largest DAX ETF**
+IE00B53HP851,A0MR3W,iShares Core FTSE 100 UCITS ETF,UK Equity (FTSE 100 Index),Satellite,Ireland,GBP,Distributing,Tracks the FTSE 100 index (UK large-cap equities)
+IE00BKM4GZ66,A111X9,iShares Core MSCI EM IMI UCITS ETF,Emerging Markets Equity (All Cap),Core,Ireland,USD,Accumulating,"Broad EM equity portfolio including large, mid, and small caps"
+IE00BJZ2DD79,A1XEJT,Xtrackers Russell 2000 UCITS ETF 1C,US Small-Cap Equity (Russell 2000),Satellite,Ireland,USD,Accumulating,Tracks the Russell 2000 index of U.S. small-cap stocks
+IE00B1FZS350,A0LEW8,iShares Dev. Markets Property Yield ETF,Global Real Estate (REITs),Satellite,Ireland,GBP,Distributing,Global listed real estate investment trusts (property equities)
+IE00B0RGQH00,*n/a*,iShares S&P Global Tech Sector ETF,Technology Sector (Global),Satellite,Ireland,USD,Accumulating,Global technology sector exposure (diversified across tech industry leaders)
+IE00BM67HQ30,*n/a*,Xtrackers MSCI World Health Care ETF,Healthcare Sector (Global),Satellite,Ireland,USD,Accumulating,"Global healthcare sector exposure (pharma, biotech, medical devices)"
+IE00BM66BW21,*n/a*,Xtrackers MSCI World Financials ETF,Financials Sector (Global),Satellite,Ireland,USD,Accumulating,"Global financial sector exposure (banks, insurance, fintech)"
+IE00BM67HW99,*n/a*,Xtrackers MSCI World Energy ETF,Energy Sector (Global),Satellite,Ireland,USD,Accumulating,"Global energy sector exposure (oil, gas and energy companies)"
+IE00B0M62Q58,A0M5XN,iShares Global Materials UCITS ETF,Materials Sector (Global),Satellite,Ireland,USD,Accumulating,"Global basic materials sector exposure (metals, mining, chemicals)"
+IE00BYTRRH56,A2AGZ5,SPDR MSCI World Utilities UCITS ETF,Utilities Sector (Global),Satellite,Ireland,USD,Accumulating,"Global utilities sector exposure (electric, water, gas utilities)"
+DE000A0F5UH1,A0F5UH,iShares STOXX Global Select Dividend 100,Dividend Stocks (Global High Yield),Satellite,Germany,EUR,Distributing,100 high-dividend stocks worldwide (global high-yield equity)
+DE0002635299,263529,iShares STOXX Europe Select Dividend 30,Dividend Stocks (Europe High Yield),Satellite,Germany,EUR,Distributing,30 high-yielding European companies (Euro Stoxx Select Dividend index)
+DE0002635273,263527,iShares DivDAX UCITS ETF (DE),Dividend Stocks (Germany High Yield),Satellite,Germany,EUR,Distributing,15 highest-yielding stocks in the German DAX index (DivDAX)
+IE00BGV5VN51,A2N6LC,Xtrackers Artificial Intelligence & Big Data,Artificial Intelligence Theme,Satellite,Ireland,EUR,Accumulating,Global AI & Big Data companies (theme index); **largest AI-themed ETF in Europe**
+IE00BGBN6P67,A2PA3S,Invesco CoinShares Global Blockchain ETF,Blockchain Technology Theme,Satellite,Ireland,USD,Accumulating,Global companies in the blockchain ecosystem (distributed ledger tech)
+IE00BYXG2H39,A2DWAW,iShares Nasdaq US Biotechnology UCITS ETF,Biotechnology Theme (US-focused),Satellite,Ireland,USD,Accumulating,Biotech and pharmaceutical innovators (Nasdaq Biotechnology index)
+IE00B1XNHC34,A0MW0M,iShares Global Clean Energy UCITS ETF,Clean Energy Theme,Satellite,Ireland,USD,Distributing,Renewable & clean power companies (global clean energy index)
+IE00BQQP9F84,A12CCL,VanEck Gold Miners UCITS ETF,Gold Mining Stocks,Satellite,Ireland,USD,Accumulating,Global gold mining companies (gold-miner equities exposure)
+IE00BLCHJP11,A2PGJ2,Global X Lithium & Battery Tech ETF,Lithium & Battery Technology Theme,Satellite,Ireland,USD,Accumulating,"Companies in EV battery supply chain (lithium miners, battery producers)"
+IE00BQQP9G91,A2QMWR,VanEck Rare Earth & Strategic Metals ETF,Rare Earth Metals Theme,Satellite,Ireland,USD,Accumulating,Rare earth element and strategic metals miners (critical materials)
+IE00BLCHJZ35,*n/a*,Global X FinTech UCITS ETF,Financial Technology Theme,Satellite,Ireland,USD,Accumulating,"Global fintech innovators (digital payments, online lending, etc.)"
+IE00BYPLS672,*n/a*,L&G Cyber Security UCITS ETF,Cybersecurity Theme,Satellite,Ireland,USD,Accumulating,Companies focused on cybersecurity technology (global cyber defense firms)
+IE00BJGWQN72,*n/a*,WisdomTree Cloud Computing UCITS ETF,Cloud Computing Theme,Satellite,Ireland,USD,Accumulating,Global cloud software and services companies (cloud infrastructure and SaaS)
+IE00BMC38736,*n/a*,VanEck Semiconductor UCITS ETF,Semiconductor Industry Theme,Satellite,Ireland,USD,Accumulating,Semiconductor & chip equipment companies (global semiconductor industry)
+IE00BYZK4552,A2ANH3,iShares Automation & Robotics UCITS ETF,Robotics & Automation Theme,Satellite,Ireland,USD,Accumulating,"Companies in robotics, AI, and factory automation technologies"
+IE00BYX2JD69,A2DVB9,iShares MSCI World SRI UCITS ETF,Global Equity (ESG Focus),Satellite,Ireland,EUR,Accumulating,Sustainable ESG-screened global equity fund (MSCI World SRI index)
+IE00B3DKXQ41,A0RPW6,iShares Core € Govt Bond UCITS ETF,Eurozone Government Bonds,Core,Ireland,EUR,Distributing,"Investment-grade Eurozone sovereign bonds (e.g. German Bunds, French OATs)"
+IE00B4X9L533,A1J0H0,iShares Core Global Aggregate Bond ETF,Global Aggregate Bonds (Multi-currency),Core,Ireland,USD,Accumulating,"Diversified global bond portfolio (sovereigns, corporates, MBS)"
+IE00B5M4WH52,A1JADV,iShares J.P. Morgan EM Local Govt Bond ETF,EM Government Bonds (Local Currency),Satellite,Ireland,USD,Distributing,Emerging markets government bonds in local currencies (JPM GBI-EM index)
+IE00B3F81R35,A0RGEP,iShares Core € Corporate Bond UCITS ETF,Euro Corporate Bonds (Investment Grade),Core,Ireland,EUR,Distributing,Investment-grade euro-denominated corporate bonds
+IE00B3B8PX14,A0Q41X,iShares Global Inflation-Linked Bond ETF,Global Inflation-Linked Bonds,**Hedge**,Ireland,USD,Accumulating,Developed-market inflation-protected bonds (global IL sovereign index)
+DE000A0H0728,A0H072,iShares Diversified Commodity Swap ETF,Broad Commodities Index,**Hedge**,Germany,USD,Accumulating,"Diversified commodity basket (energy, industrial metals, agriculture)"
+DE000A0S9GB0,A0S9GB,Xetra-Gold (Physical Gold ETC),Gold (Physical Holding),**Hedge**,Germany,EUR,n/a (no yield),"Physically backed gold (1:1 gold holdings, inflation and crisis hedge)"
+JE00B1VS3333,A0N6XJ,WisdomTree Physical Silver ETC,Silver (Physical Holding),**Hedge**,Jersey,USD,n/a (no yield),Physically backed silver (precious metal hedge and diversifier)
+JE00B78CGV99,A1N49M,WisdomTree Brent Crude Oil ETC,Crude Oil (Commodity),Satellite,Jersey,USD,n/a (futures),Tracks Brent Crude Oil futures (energy commodity exposure)
+GB00B15KXQ89,A0KRKR,WisdomTree Copper ETC,Copper (Industrial Metal),Satellite,Jersey,USD,n/a (futures),Tracks Copper futures (industrial metal exposure for diversification)
+JE00BN7KB664,A3G8J7,WisdomTree Wheat ETC,Wheat (Agricultural Commodity),Satellite,Jersey,USD,n/a (futures),Tracks Wheat futures (agricultural commodity exposure)
+JE00BP2PWW32,A3GTR6,WisdomTree Carbon ETC,Carbon Emissions (Allowance Futures),Satellite,Jersey,EUR,n/a (futures),Tracks the price of carbon emission allowances (EU carbon credits; climate hedge)

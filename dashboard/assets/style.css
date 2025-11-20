@@ -1,0 +1,105 @@
+/* Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Main Container */
+.main .block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    max-width: 1200px;
+}
+
+/* Headers */
+h1, h2, h3 {
+    font-weight: 600;
+    color: #ffffff !important;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Cards */
+.stCard {
+    background-color: #1f2937; /* Dark gray */
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+    border: 1px solid #374151;
+    margin-bottom: 1rem;
+}
+
+.stCard h3, .stCard h4 {
+    color: #f3f4f6 !important; /* Light gray text */
+    margin-top: 0;
+}
+
+.stCard p, .stCard li {
+    color: #d1d5db !important; /* Lighter gray text */
+}
+
+/* Metrics */
+div[data-testid="stMetricValue"] {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #60a5fa !important; /* Blue-400 */
+}
+
+div[data-testid="stMetricLabel"] {
+    font-size: 0.875rem;
+    color: #9ca3af !important; /* Gray-400 */
+    font-weight: 500;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #111827; /* Very dark gray */
+    border-right: 1px solid #374151;
+}
+
+/* Buttons */
+.stButton button {
+    background-color: #2563eb;
+    color: white;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    border: none;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+}
+
+.stButton button:hover {
+    background-color: #1d4ed8;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+    border-color: #1d4ed8;
+}
+
+/* Dataframes */
+div[data-testid="stDataFrame"] {
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+/* Custom Classes */
+.strategy-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.badge-benchmark { background-color: #1e3a8a; color: #bfdbfe; border: 1px solid #1d4ed8; }
+.badge-implementable { background-color: #064e3b; color: #a7f3d0; border: 1px solid #059669; }
+.badge-paper { background-color: #374151; color: #f3f4f6; border: 1px solid #4b5563; }
+.badge-warning { background-color: #78350f; color: #fde68a; border: 1px solid #d97706; }
