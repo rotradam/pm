@@ -10,6 +10,7 @@ from .momentum import ExponentialGradient, UniversalPortfolio
 from .mean_reversion import OLMAR, PAMR, CWMR, RMR
 from .correlation_driven import CORN, CORNK, CORNU
 from .follow_the_leader import BCRP, BestStock, FTL, FTRL
+from .dtc import DTC
 from .skfolio_adapter import SkfolioAdapter
 from skfolio.optimization import MeanRisk
 
@@ -42,6 +43,9 @@ STRATEGY_REGISTRY = {
     'BestStock': BestStock,
     'FTL': FTL,
     'FTRL': FTRL,
+    
+    # Decentralized strategies
+    'DTC': DTC,
 }
 
 
@@ -158,6 +162,7 @@ __all__ = [
     'UniversalPortfolio',
     'OLMAR',
     'PAMR',
+    'DTC',
     'SkfolioAdapter',
     
     # Registry functions

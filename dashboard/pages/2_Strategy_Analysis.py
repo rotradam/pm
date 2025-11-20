@@ -67,7 +67,17 @@ def get_default_strategy_config(strategy_id, initial_capital=10000):
         'FTRL': {'lam': 0.1},
         
         # Skfolio
-        'MV': {}
+        'MV': {},
+        
+        # DTC
+        'DTC': {
+            'variant': 'DTC1',
+            'lambda_param': 0.05,
+            'xi_param': 1.0,
+            'cost_rate': 0.0025,
+            'alpha': 0.5, # Default for DTC1
+            'gamma': 1e-5 # Default for DTC2, will be overridden if DTC1
+        }
     }
     
     if strategy_id in defaults:
