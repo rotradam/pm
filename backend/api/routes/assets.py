@@ -31,55 +31,48 @@ class AssetHistory(BaseModel):
 async def get_assets(
     search: Optional[str] = None,
     category: Optional[str] = None,
+    region: Optional[str] = None,
+    exchange: Optional[str] = None,
+    sort_by: Optional[str] = None,
+    sort_order: str = "asc",
     limit: int = 100,
     offset: int = 0
 ):
     """
     Get a list of assets with optional filtering and search.
     """
-    # Since our DB class is simple, we'll fetch all/search and then filter/paginate in memory for now
-    # In a real production app, we'd push this to SQL
-    
-    if search:
-        df = db.search_assets(search, limit=limit + offset)
-    elif category:
-        df = db.get_assets_by_category(category)
-    else:
-        df = db.get_all_assets()
-        
-    # Apply offset/limit manually if not handled by DB method
-    # (search_assets handles limit, others don't fully)
+    df = db.get_filtered_assets(
+        search=search,
+        category=category,
+        region=region,
+        exchange=exchange,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        limit=limit,
+        offset=offset
+    )
     
     # Convert NaNs to None for JSON compliance
     df = df.where(pd.notnull(df), None)
-    
-    # Slice for pagination
-    start = offset
-    end = offset + limit
-    if len(df) > start:
-        sliced_df = df.iloc[start:end]
-    else:
-        sliced_df = pd.DataFrame()
         
-    return sliced_df.to_dict(orient="records")
+    return df.to_dict(orient="records")
 
 @router.get("/{ticker}", response_model=Asset)
 async def get_asset_details(ticker: str):
     """
     Get details for a specific asset.
     """
-    # We can reuse search or get_all, but let's just search for exact match
-    # Ideally DB should have get_by_ticker
-    df = db.search_assets(ticker, limit=1)
+    asset = db.get_asset_by_ticker(ticker)
     
-    # Filter for exact match just in case
-    match = df[df['ticker'] == ticker]
-    
-    if match.empty:
+    if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
         
-    record = match.iloc[0].where(pd.notnull(match.iloc[0]), None).to_dict()
-    return record
+    # Handle NaNs
+    for k, v in asset.items():
+        if pd.isna(v):
+            asset[k] = None
+            
+    return asset
 
 @router.get("/{ticker}/history")
 async def get_asset_history(ticker: str, period: str = "1y"):
@@ -111,9 +104,9 @@ async def get_asset_history(ticker: str, period: str = "1y"):
 
         # 2. If yfinance fails, check if we have a CoinGecko ID
         # Fetch asset details from DB
-        asset_df = db.search_assets(ticker, limit=1)
-        if not asset_df.empty and asset_df.iloc[0]['ticker'] == ticker:
-            cg_id = asset_df.iloc[0].get('coingecko_id')
+        asset = db.get_asset_by_ticker(ticker)
+        if asset:
+            cg_id = asset.get('coingecko_id')
             
             if cg_id:
                 # Fetch from CoinGecko

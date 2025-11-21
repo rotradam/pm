@@ -99,6 +99,20 @@ class AssetDatabase:
         conn.close()
         return df
         
+    def get_asset_by_ticker(self, ticker: str) -> Optional[Dict]:
+        """
+        Get a single asset by its ticker (exact match).
+        """
+        conn = self._get_conn()
+        sql = "SELECT * FROM assets WHERE ticker = ? AND active = 1"
+        df = pd.read_sql(sql, conn, params=(ticker,))
+        conn.close()
+        
+        if df.empty:
+            return None
+            
+        return df.iloc[0].to_dict()
+
     def search_assets(self, query: str, limit: int = 20) -> pd.DataFrame:
         """
         Search assets by ticker or name.
@@ -114,6 +128,7 @@ class AssetDatabase:
                 ticker LIKE ? OR 
                 name LIKE ?
             )
+            ORDER BY length(ticker) ASC, ticker ASC
             LIMIT ?
         """
         param = f"%{query}%"
@@ -147,3 +162,54 @@ class AssetDatabase:
             result[cat] = subs
             
         return result
+
+    def get_filtered_assets(
+        self,
+        search: Optional[str] = None,
+        category: Optional[str] = None,
+        region: Optional[str] = None,
+        exchange: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        sort_order: str = "asc",
+        limit: int = 100,
+        offset: int = 0
+    ) -> pd.DataFrame:
+        """
+        Get assets with multiple filters and sorting.
+        """
+        conn = self._get_conn()
+        
+        query = "SELECT * FROM assets WHERE active = 1"
+        params = []
+        
+        if search:
+            query += " AND (ticker LIKE ? OR name LIKE ?)"
+            search_param = f"%{search}%"
+            params.extend([search_param, search_param])
+            
+        if category and category != "All":
+            query += " AND category = ?"
+            params.append(category)
+            
+        if region:
+            query += " AND region = ?"
+            params.append(region)
+            
+        if exchange:
+            query += " AND exchange = ?"
+            params.append(exchange)
+            
+        # Whitelist sort columns to prevent SQL injection
+        valid_sort_cols = ["ticker", "name", "category", "subcategory", "region", "exchange"]
+        if sort_by in valid_sort_cols:
+            order = "DESC" if sort_order.lower() == "desc" else "ASC"
+            query += f" ORDER BY {sort_by} {order}"
+        else:
+            query += " ORDER BY ticker ASC"
+            
+        query += " LIMIT ? OFFSET ?"
+        params.extend([limit, offset])
+        
+        df = pd.read_sql(query, conn, params=params)
+        conn.close()
+        return df

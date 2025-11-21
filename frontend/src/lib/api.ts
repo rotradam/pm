@@ -23,11 +23,20 @@ export async function fetchAssets(
   search?: string,
   category?: string,
   limit: number = 100,
-  offset: number = 0
+  offset: number = 0,
+  region?: string,
+  exchange?: string,
+  sort_by?: string,
+  sort_order?: "asc" | "desc"
 ): Promise<Asset[]> {
   const params = new URLSearchParams();
   if (search) params.append("search", search);
-  if (category) params.append("category", category);
+  if (category && category !== "All") params.append("category", category);
+  if (region) params.append("region", region);
+  if (exchange) params.append("exchange", exchange);
+  if (sort_by) params.append("sort_by", sort_by);
+  if (sort_order) params.append("sort_order", sort_order);
+  
   params.append("limit", limit.toString());
   params.append("offset", offset.toString());
 

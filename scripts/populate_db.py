@@ -8,6 +8,7 @@ import logging
 sys.path.append(str(Path(__file__).parent.parent))
 
 from backend.data.database import AssetDatabase
+from scripts.data.asset_lists import BOND_ETFS, COMMODITY_ETFS, EQUITY_ETFS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -58,25 +59,27 @@ def fetch_sp500_assets():
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-        tables = pd.read_html(response.text, header=0)
-        df = tables[0]
-        logger.info(f"S&P 500 Table columns: {df.columns.tolist()}")
+        tables = pd.read_html(response.text)
         
-        # Find symbol column
-        symbol_col = next((col for col in df.columns if 'Symbol' in col or 'Ticker' in col), None)
-        security_col = next((col for col in df.columns if 'Security' in col or 'Company' in col), None)
+        df = pd.DataFrame()
+        for table in tables:
+            if 'Symbol' in table.columns and 'Security' in table.columns:
+                df = table
+                break
         
-        if not symbol_col or not security_col:
-            logger.error(f"Could not find Symbol or Security column. Available: {df.columns}")
+        if df.empty:
+            logger.error("Could not find S&P 500 table")
             return pd.DataFrame()
             
+        logger.info(f"S&P 500 Table columns: {df.columns.tolist()}")
+        
         assets = []
         for _, row in df.iterrows():
-            ticker = row[symbol_col].replace('.', '-') # BRK.B -> BRK-B
+            ticker = row['Symbol'].replace('.', '-') # BRK.B -> BRK-B
             assets.append({
                 "ticker": ticker,
-                "name": row[security_col],
-                "category": "Equities",
+                "name": row['Security'],
+                "category": "Stock", # Changed from Equities
                 "subcategory": "US Large Cap (S&P 500)",
                 "region": "USA",
                 "currency": "USD",
@@ -114,7 +117,7 @@ def fetch_nasdaq100_assets():
             assets.append({
                 "ticker": ticker,
                 "name": row[company_col],
-                "category": "Equities",
+                "category": "Stock", # Changed from Equities
                 "subcategory": "US Tech (NASDAQ 100)",
                 "region": "USA",
                 "currency": "USD",
@@ -125,42 +128,70 @@ def fetch_nasdaq100_assets():
         logger.error(f"Error fetching NASDAQ 100: {e}")
         return pd.DataFrame()
 
-def get_manual_etfs():
-    """Return a manually curated list of major ETFs."""
-    logger.info("Adding curated ETFs...")
-    etfs = [
-        # US Equity
-        {"ticker": "SPY", "name": "SPDR S&P 500 ETF Trust", "category": "ETF", "subcategory": "US Equity", "region": "USA"},
-        {"ticker": "IVV", "name": "iShares Core S&P 500 ETF", "category": "ETF", "subcategory": "US Equity", "region": "USA"},
-        {"ticker": "VOO", "name": "Vanguard S&P 500 ETF", "category": "ETF", "subcategory": "US Equity", "region": "USA"},
-        {"ticker": "QQQ", "name": "Invesco QQQ Trust", "category": "ETF", "subcategory": "US Equity", "region": "USA"},
-        {"ticker": "IWM", "name": "iShares Russell 2000 ETF", "category": "ETF", "subcategory": "US Equity", "region": "USA"},
+def load_csv_etfs():
+    """Load ETFs from the CSV file."""
+    logger.info("Loading ETFs from CSV...")
+    csv_path = Path(__file__).parent.parent / "documents" / "etf_universe_with_tickers.csv"
+    if not csv_path.exists():
+        logger.warning("ETF CSV not found.")
+        return pd.DataFrame()
         
-        # International Equity
-        {"ticker": "VXUS", "name": "Vanguard Total International Stock ETF", "category": "ETF", "subcategory": "International Equity", "region": "Global"},
-        {"ticker": "EFA", "name": "iShares MSCI EAFE ETF", "category": "ETF", "subcategory": "International Equity", "region": "Developed Markets"},
-        {"ticker": "EEM", "name": "iShares MSCI Emerging Markets ETF", "category": "ETF", "subcategory": "International Equity", "region": "Emerging Markets"},
-        
-        # Fixed Income
-        {"ticker": "AGG", "name": "iShares Core U.S. Aggregate Bond ETF", "category": "ETF", "subcategory": "Fixed Income", "region": "USA"},
-        {"ticker": "BND", "name": "Vanguard Total Bond Market ETF", "category": "ETF", "subcategory": "Fixed Income", "region": "USA"},
-        {"ticker": "TLT", "name": "iShares 20+ Year Treasury Bond ETF", "category": "ETF", "subcategory": "Fixed Income", "region": "USA"},
-        {"ticker": "LQD", "name": "iShares iBoxx $ Inv Grade Corporate Bond ETF", "category": "ETF", "subcategory": "Fixed Income", "region": "USA"},
-        {"ticker": "HYG", "name": "iShares iBoxx $ High Yield Corporate Bond ETF", "category": "ETF", "subcategory": "Fixed Income", "region": "USA"},
-        
-        # Commodities & Real Estate
-        {"ticker": "GLD", "name": "SPDR Gold Shares", "category": "ETF", "subcategory": "Commodities", "region": "Global"},
-        {"ticker": "SLV", "name": "iShares Silver Trust", "category": "ETF", "subcategory": "Commodities", "region": "Global"},
-        {"ticker": "USO", "name": "United States Oil Fund", "category": "ETF", "subcategory": "Commodities", "region": "Global"},
-        {"ticker": "VNQ", "name": "Vanguard Real Estate ETF", "category": "ETF", "subcategory": "Real Estate", "region": "USA"},
-    ]
+    try:
+        df = pd.read_csv(csv_path)
+        assets = []
+        for _, row in df.iterrows():
+            ticker = row['ticker']
+            if pd.isna(ticker):
+                continue
+                
+            # Determine category based on sector
+            sector = str(row['sector'])
+            category = "ETF"
+            if "Bond" in sector:
+                category = "Bond"
+            elif any(x in sector for x in ["Commodity", "Gold", "Silver", "Oil", "Wheat", "Copper"]):
+                category = "Commodity"
+                
+            assets.append({
+                "ticker": ticker,
+                "name": row['name'],
+                "category": category,
+                "subcategory": sector,
+                "region": row['domicile'] if not pd.isna(row['domicile']) else "Global",
+                "currency": row['currency'] if not pd.isna(row['currency']) else "USD",
+                "exchange": "Global" # Simplified
+            })
+        return pd.DataFrame(assets)
+    except Exception as e:
+        logger.error(f"Error loading ETF CSV: {e}")
+        return pd.DataFrame()
+
+def get_curated_lists():
+    """Return curated lists of assets."""
+    logger.info("Adding curated asset lists...")
     
-    # Add defaults
-    for etf in etfs:
-        etf["currency"] = "USD"
-        etf["exchange"] = "US"
+    # Process lists
+    all_assets = []
+    
+    for item in BOND_ETFS:
+        item["category"] = "Bond"
+        item["currency"] = "USD"
+        item["exchange"] = "US"
+        all_assets.append(item)
         
-    return pd.DataFrame(etfs)
+    for item in COMMODITY_ETFS:
+        item["category"] = "Commodity"
+        item["currency"] = "USD"
+        item["exchange"] = "US"
+        all_assets.append(item)
+        
+    for item in EQUITY_ETFS:
+        item["category"] = "ETF"
+        item["currency"] = "USD"
+        item["exchange"] = "US"
+        all_assets.append(item)
+        
+    return pd.DataFrame(all_assets)
 
 def main():
     db = AssetDatabase()
@@ -180,10 +211,15 @@ def main():
     if not nasdaq_df.empty:
         db.add_assets(nasdaq_df)
         
-    # 4. ETFs
-    etf_df = get_manual_etfs()
-    if not etf_df.empty:
-        db.add_assets(etf_df)
+    # 4. CSV ETFs
+    csv_etf_df = load_csv_etfs()
+    if not csv_etf_df.empty:
+        db.add_assets(csv_etf_df)
+        
+    # 5. Curated Lists (Bonds, Commodities, ETFs)
+    curated_df = get_curated_lists()
+    if not curated_df.empty:
+        db.add_assets(curated_df)
         
     logger.info("Database population complete!")
 
