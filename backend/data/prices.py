@@ -33,6 +33,26 @@ class PriceFetcher:
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"Price cache directory: {self.cache_dir}")
+
+    def check_ticker_availability(self, ticker: str) -> bool:
+        """
+        Check if a ticker is valid and has data available on Yahoo Finance.
+        
+        Args:
+            ticker: Yahoo Finance ticker symbol
+            
+        Returns:
+            True if valid, False otherwise
+        """
+        try:
+            # Try to fetch 1 day of data
+            t = yf.Ticker(ticker)
+            # Fast check: history(period="1d")
+            hist = t.history(period="1d")
+            return not hist.empty
+        except Exception as e:
+            logger.warning(f"Ticker check failed for {ticker}: {e}")
+            return False
     
     def fetch_ticker(
         self,

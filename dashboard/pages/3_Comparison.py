@@ -3,11 +3,13 @@ import pandas as pd
 import numpy as np
 import sys
 from pathlib import Path
+from datetime import datetime, timedelta
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from backend.strategies import list_strategies, get_strategy
+from backend.data.prices import PriceFetcher
 from dashboard.utils.ui import load_css
 from dashboard.utils.viz import plot_equity_curves, plot_drawdowns, plot_metrics_table
 
@@ -18,7 +20,18 @@ st.title("⚖️ Strategy Comparison")
 
 # Load Data
 @st.cache_data
-def load_data():
+def load_data(tickers=None):
+    if tickers:
+        try:
+            fetcher = PriceFetcher()
+            # Default to 10 years
+            end_date = datetime.now().strftime("%Y-%m-%d")
+            start_date = (datetime.now() - timedelta(days=365*10)).strftime("%Y-%m-%d")
+            return fetcher.get_adjusted_close_matrix(tickers, start_date, end_date)
+        except Exception as e:
+            st.error(f"Error fetching data: {e}")
+            return None
+
     try:
         processed_dir = Path("data/processed")
         price_files = list(processed_dir.glob("prices_*.parquet"))
@@ -30,7 +43,13 @@ def load_data():
     except:
         return None
 
-prices = load_data()
+selected_tickers = st.session_state.get("selected_tickers", [])
+if selected_tickers:
+    st.info(f"Comparing strategies on {len(selected_tickers)} selected assets: {', '.join(selected_tickers)}")
+    prices = load_data(selected_tickers)
+else:
+    st.info("Using default universe data.")
+    prices = load_data()
 
 if prices is None:
     st.error("Data not found.")

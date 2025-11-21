@@ -35,6 +35,9 @@ class Universe:
         self.df = pd.read_csv(self.csv_path)
         self._validate()
         
+        # Store manually added tickers
+        self.manual_tickers = []
+        
         logger.info(f"Loaded universe with {len(self.df)} instruments across "
                    f"{self.df['sector'].nunique()} sectors")
     
@@ -58,8 +61,49 @@ class Universe:
             self.df = self.df.dropna(subset=["isin"])
     
     def get_all(self) -> pd.DataFrame:
-        """Return the full universe DataFrame."""
-        return self.df.copy()
+        """Return the full universe DataFrame, including manual tickers."""
+        df = self.df.copy()
+        
+        if self.manual_tickers:
+            manual_df = pd.DataFrame(self.manual_tickers)
+            df = pd.concat([df, manual_df], ignore_index=True)
+            
+        return df
+
+    def add_manual_tickers(self, tickers: List[str]):
+        """
+        Add manual tickers to the universe.
+        
+        Args:
+            tickers: List of ticker strings
+        """
+        new_tickers = []
+        existing_tickers = set(self.df["isin"].tolist()) # Assuming ISIN column holds tickers for now, or we map later.
+        # Wait, the CSV has 'isin', but manual tickers are 'tickers'.
+        # The system maps ISIN -> Ticker later.
+        # For manual tickers, we can assume ISIN=Ticker for simplicity in this context, 
+        # or we need to handle the 'ticker' column if it exists.
+        # Let's check if 'ticker' column exists in self.df.
+        # The csv has 'sector', 'name', 'isin', 'wkn', 'notes'.
+        # The mapping happens in 'mapper.py'.
+        
+        # To make this work seamlessly, I'll add them as rows with isin=ticker, name=ticker, sector='Manual'.
+        
+        for t in tickers:
+            # Check if already in manual list
+            if any(d['isin'] == t for d in self.manual_tickers):
+                continue
+            
+            new_tickers.append({
+                "sector": "Manual",
+                "name": t,
+                "isin": t, # Treat ticker as ISIN for manual entries
+                "wkn": "MANUAL",
+                "notes": "User added"
+            })
+            
+        self.manual_tickers.extend(new_tickers)
+        logger.info(f"Added {len(new_tickers)} manual tickers")
     
     def filter_by_sector(self, sectors: List[str]) -> pd.DataFrame:
         """

@@ -43,8 +43,14 @@ def calculate_relative_returns(prices: pd.DataFrame) -> np.ndarray:
         numpy array of shape (T-1, N) where T is time periods and N is assets
         Each row represents the price relatives for all assets at time t
     """
-    # Calculate price relatives (avoid first row which would be inf)
-    price_relatives = (prices / prices.shift(1)).dropna()
+    # Calculate price relatives
+    # We use iloc[1:] to drop the first row (which is always NaN/Inf due to shift)
+    # We fill other NaNs with 1.0 (no change) to preserve shape and avoid IndexError
+    price_relatives = (prices / prices.shift(1)).iloc[1:]
+    
+    # Handle division by zero (inf) and 0/0 (nan)
+    price_relatives = price_relatives.replace([np.inf, -np.inf], 1.0).fillna(1.0)
+    
     return price_relatives.values
 
 

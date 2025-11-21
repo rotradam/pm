@@ -70,8 +70,13 @@ class DTC(OlpsStrategy):
         n_periods, n_assets = prices.shape
         
         # Calculate price relatives (x_t = p_t / p_{t-1})
-        # We prepend a row of 1s for the first period to align indices
-        x = np.vstack([np.ones(n_assets), prices[1:] / prices[:-1]])
+        # We use the robust utility function
+        x_relatives = calculate_relative_returns(prices_df)
+        
+        # Prepend a row of 1s for the first period to align indices with prices
+        # x[0] corresponds to t=0 (initial period, no return)
+        # x[t] corresponds to return from t-1 to t
+        x = np.vstack([np.ones(n_assets), x_relatives])
         
         # Initialize variables
         weights = np.zeros((n_periods, n_assets))
@@ -135,8 +140,8 @@ class DTC(OlpsStrategy):
                 # x_hat_t = p_hat_t / p_{t-1}
                 # Handle division by zero if price is 0 (unlikely)
                 with np.errstate(divide='ignore', invalid='ignore'):
-                    x_pred = p_pred / p_prev
-                    x_pred = np.nan_to_num(x_pred, nan=1.0)
+                    x_pred = p_pred / (p_prev + 1e-8) # Add epsilon
+                    x_pred = np.nan_to_num(x_pred, nan=1.0, posinf=1.0, neginf=1.0)
                 
                 p_pred_prev = p_pred
                 
@@ -157,8 +162,8 @@ class DTC(OlpsStrategy):
                 # Wait, the formula in notes: x_pred = alpha + (1-alpha) * (x_pred_prev / actual_x_prev)
                 # This looks like a mean reversion of relatives?
                 with np.errstate(divide='ignore', invalid='ignore'):
-                    term2 = x_pred_prev / x_actual_prev
-                    term2 = np.nan_to_num(term2, nan=1.0)
+                    term2 = x_pred_prev / (x_actual_prev + 1e-8)
+                    term2 = np.nan_to_num(term2, nan=1.0, posinf=1.0, neginf=1.0)
                     
                 x_pred = alpha_adaptive + (1 - alpha_adaptive) * term2
                 x_pred_prev = x_pred

@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 from typing import Dict, Any, List, Optional
 from .base import OlpsStrategy, StrategyResult, StrategyType, StrategyComplexity
+from backend.strategies.utils import (
+    calculate_relative_returns,
+    normalize_weights
+)
 
 class WAEGStrategy(OlpsStrategy):
     """
@@ -10,7 +14,6 @@ class WAEGStrategy(OlpsStrategy):
     This strategy combines multiple Exponential Gradient (EG) experts with different 
     learning rates using the Weak Aggregating Algorithm (WAA).
     
-    Reference:
     "Boosting Exponential Gradient Strategy for Online Portfolio Selection"
     """
     
@@ -56,9 +59,12 @@ class WAEGStrategy(OlpsStrategy):
         assets = prices_df.columns
         
         # Calculate price relatives (x_t = p_t / p_{t-1})
+        # Use robust utility function
+        x_relatives = calculate_relative_returns(prices_df)
+        
         # First period has no relative, so we start from t=1
         x = np.zeros_like(prices)
-        x[1:] = prices[1:] / prices[:-1]
+        x[1:] = x_relatives
         x[0] = 1.0 # Placeholder for first period
         
         # Initialize state
@@ -122,7 +128,7 @@ class WAEGStrategy(OlpsStrategy):
             for i in range(k):
                 ret = np.dot(expert_b[i], x_next)
                 current_expert_returns[i] = ret
-                if ret > 0:
+                if ret > 1e-10:
                     expert_log_returns[i] += np.log(ret)
                 else:
                     expert_log_returns[i] += -100 # Penalize heavily if 0 or negative
@@ -142,7 +148,11 @@ class WAEGStrategy(OlpsStrategy):
             exponents = expert_log_returns / np.sqrt(time_idx)
             max_exp = np.max(exponents)
             numerator = np.exp(exponents - max_exp)
-            expert_weights = numerator / np.sum(numerator)
+            denom_weights = np.sum(numerator)
+            if denom_weights > 0:
+                expert_weights = numerator / denom_weights
+            else:
+                expert_weights = np.ones(k) / k
             
             # 3. Update expert portfolios (EG update)
             # b_{t+1} = b_t * exp(eta * x_t / (b_t * x_t)) / Z
@@ -153,8 +163,16 @@ class WAEGStrategy(OlpsStrategy):
                 # EG Update
                 denom = np.dot(b, x_next)
                 if denom > 1e-10:
-                    numerator_eg = b * np.exp(eta * x_next / denom)
-                    b_new = numerator_eg / np.sum(numerator_eg)
+                    # Add epsilon to x_next/denom to avoid overflow if denom is tiny
+                    exponent = eta * x_next / (denom + 1e-10)
+                    # Clip exponent to avoid overflow
+                    exponent = np.clip(exponent, -100, 100)
+                    numerator_eg = b * np.exp(exponent)
+                    numerator_sum = np.sum(numerator_eg)
+                    if numerator_sum > 0:
+                        b_new = numerator_eg / numerator_sum
+                    else:
+                        b_new = b
                 else:
                     b_new = b # No update if return is 0
                 
