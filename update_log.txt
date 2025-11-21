@@ -1,0 +1,20 @@
+INFO:__main__:Updating Crypto data...
+INFO:__main__:Found 477 crypto assets in DB.
+INFO:__main__:Found 475 assets with CoinGecko ID.
+INFO:backend.data.database:Inserting/Updating 475 assets into database...
+INFO:backend.data.database:Added/Updated 475 assets in database.
+INFO:__main__:Updated 475 crypto assets.
+INFO:__main__:Updating Stock/ETF/Bond/Commodity data...
+INFO:__main__:Fetching chunk 1 (500 tickers)...
+/Users/royceantonjose/git_rotradam/portfolioManagement/scripts/update_market_data.py:122: FutureWarning: YF.download() has changed argument auto_adjust default to True
+  data = yf.download(chunk, period="5d", group_by='ticker', threads=True, progress=False)
+INFO:__main__:Fetching chunk 2 (144 tickers)...
+/Users/royceantonjose/git_rotradam/portfolioManagement/scripts/update_market_data.py:122: FutureWarning: YF.download() has changed argument auto_adjust default to True
+  data = yf.download(chunk, period="5d", group_by='ticker', threads=True, progress=False)
+ERROR:yfinance:
+5 Failed downloads:
+ERROR:yfinance:['SDGPEX.DE', 'DDAXKEX.DE', 'DAXEX.DE', 'DJCOMEX.DE', 'SD3PEX.DE']: YFPricesMissingError('possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")')
+INFO:backend.data.database:Inserting/Updating 639 assets into database...
+INFO:backend.data.database:Added/Updated 639 assets in database.
+INFO:__main__:Updated 639 stock assets.
+INFO:__main__:Market data update complete!

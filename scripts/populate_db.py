@@ -29,9 +29,12 @@ def fetch_crypto_assets():
             "sparkline": "false"
         }
         try:
+            print(f"Requesting page {page}...")
             response = requests.get(url, params=params)
+            print(f"Status: {response.status_code}")
             response.raise_for_status()
             data = response.json()
+            print(f"Got {len(data)} items")
             
             for coin in data:
                 # Yahoo Finance usually uses symbol-USD for crypto
@@ -48,6 +51,7 @@ def fetch_crypto_assets():
                 })
         except Exception as e:
             logger.error(f"Error fetching crypto page {page}: {e}")
+            print(f"EXCEPTION: {e}")
             
     return pd.DataFrame(all_coins)
 

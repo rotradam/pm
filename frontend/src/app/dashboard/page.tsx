@@ -16,27 +16,77 @@ import { Search, Filter, ChevronLeft, ChevronRight, Layers, ArrowUpRight, ArrowU
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Separator } from "@/components/ui/separator"
+
+// Simple Sparkline Component
+function Sparkline({ data, color = "#10b981" }: { data: number[], color?: string }) {
+    if (!data || data.length < 2) return null
+
+    const min = Math.min(...data)
+    const max = Math.max(...data)
+    const range = max - min || 1
+    const width = 60
+    const height = 20
+
+    const points = data.map((d, i) => {
+        const x = (i / (data.length - 1)) * width
+        const y = height - ((d - min) / range) * height
+        return `${x},${y}`
+    }).join(" ")
+
+    return (
+        <svg width={width} height={height} className="overflow-visible">
+            <polyline
+                points={points}
+                fill="none"
+                stroke={color}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </svg>
+    )
+}
+
+const CATEGORY_COLORS: Record<string, string> = {
+    "Crypto": "bg-orange-500/10 text-orange-500 border-orange-500/20",
+    "Stock": "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    "ETF": "bg-purple-500/10 text-purple-500 border-purple-500/20",
+    "Bond": "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+    "Commodity": "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+}
+
 export default function Dashboard() {
     const router = useRouter()
     const [search, setSearch] = useState("")
     const [page, setPage] = useState(0)
     const [category, setCategory] = useState("All")
-    const [region, setRegion] = useState<string | undefined>(undefined)
-    const [exchange, setExchange] = useState<string | undefined>(undefined)
+
+    // Advanced Filters State
+    const [selectedRegions, setSelectedRegions] = useState<string[]>([])
+    const [selectedExchanges, setSelectedExchanges] = useState<string[]>([])
+    const [isFilterOpen, setIsFilterOpen] = useState(false)
+
     const [sortBy, setSortBy] = useState<string | undefined>(undefined)
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
 
     const limit = 20
 
-    const { data: assets, isLoading, isError } = useQuery<Asset[]>({
-        queryKey: ['assets', search, category, region, exchange, sortBy, sortOrder, page],
+    // Derived filters for API
+    const regionFilter = selectedRegions.length > 0 ? selectedRegions[0] : undefined // API currently supports single region, need to update API for multi or just pick first for now
+    const exchangeFilter = selectedExchanges.length > 0 ? selectedExchanges[0] : undefined
+
+    const { data: assets, isLoading, isError, refetch } = useQuery<Asset[]>({
+        queryKey: ['assets', search, category, regionFilter, exchangeFilter, sortBy, sortOrder, page],
         queryFn: () => fetchAssets(
             search,
             category === "All" ? undefined : category,
             limit,
             page * limit,
-            region === "All" ? undefined : region,
-            exchange === "All" ? undefined : exchange,
+            regionFilter,
+            exchangeFilter,
             sortBy,
             sortOrder
         ),
@@ -54,10 +104,23 @@ export default function Dashboard() {
 
     const clearFilters = () => {
         setCategory("All")
-        setRegion(undefined)
-        setExchange(undefined)
+        setSelectedRegions([])
+        setSelectedExchanges([])
         setSearch("")
         setPage(0)
+        setIsFilterOpen(false)
+    }
+
+    const toggleRegion = (region: string) => {
+        setSelectedRegions(prev =>
+            prev.includes(region) ? prev.filter(r => r !== region) : [...prev, region]
+        )
+    }
+
+    const toggleExchange = (exch: string) => {
+        setSelectedExchanges(prev =>
+            prev.includes(exch) ? prev.filter(e => e !== exch) : [...prev, exch]
+        )
     }
 
     return (
@@ -85,6 +148,9 @@ export default function Dashboard() {
                         </div>
                         <div className="h-6 w-[1px] bg-white/10 mx-2"></div>
                         <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/5" onClick={() => refetch()}>
+                                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" /> {/* Using ArrowUpDown as refresh icon placeholder or import RefreshCw */}
+                            </Button>
                             <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500"></div>
                         </div>
                     </div>
@@ -99,56 +165,74 @@ export default function Dashboard() {
                             <p className="text-sm text-muted-foreground mt-1">Explore and analyze thousands of assets.</p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Popover>
-                                <PopoverTrigger asChild>
+                            <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                                <DialogTrigger asChild>
                                     <Button variant="outline" size="sm" className="h-8 border-white/10 bg-white/5 hover:bg-white/10 text-xs">
                                         <Filter className="mr-2 h-3 w-3" /> Filters
-                                        {(region || exchange) && <span className="ml-1 rounded-full bg-primary w-1.5 h-1.5" />}
+                                        {(selectedRegions.length > 0 || selectedExchanges.length > 0) && (
+                                            <span className="ml-1 rounded-full bg-primary w-1.5 h-1.5" />
+                                        )}
                                     </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-80 p-4 bg-[#0F1011] border-white/10" align="end">
-                                    <div className="space-y-4">
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px] bg-[#0F1011] border-white/10 text-foreground">
+                                    <DialogHeader>
+                                        <DialogTitle className="text-white">Filter Assets</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="grid gap-4 py-4">
                                         <div className="space-y-2">
-                                            <h4 className="font-medium leading-none text-white">Filters</h4>
-                                            <p className="text-xs text-muted-foreground">Refine your asset search.</p>
+                                            <h4 className="font-medium text-xs text-muted-foreground uppercase tracking-wider">Regions</h4>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {["Global", "US", "EU", "Asia"].map((r) => (
+                                                    <div key={r} className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id={`region-${r}`}
+                                                            checked={selectedRegions.includes(r)}
+                                                            onCheckedChange={() => toggleRegion(r)}
+                                                            className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                                        />
+                                                        <label
+                                                            htmlFor={`region-${r}`}
+                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white/80"
+                                                        >
+                                                            {r}
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
+                                        <Separator className="bg-white/10" />
                                         <div className="space-y-2">
-                                            <Label htmlFor="region" className="text-xs">Region</Label>
-                                            <Select value={region} onValueChange={setRegion}>
-                                                <SelectTrigger id="region" className="h-8 text-xs bg-white/5 border-white/10">
-                                                    <SelectValue placeholder="All Regions" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="All">All Regions</SelectItem>
-                                                    <SelectItem value="Global">Global</SelectItem>
-                                                    <SelectItem value="US">United States</SelectItem>
-                                                    <SelectItem value="EU">Europe</SelectItem>
-                                                    <SelectItem value="Asia">Asia</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="exchange" className="text-xs">Exchange</Label>
-                                            <Select value={exchange} onValueChange={setExchange}>
-                                                <SelectTrigger id="exchange" className="h-8 text-xs bg-white/5 border-white/10">
-                                                    <SelectValue placeholder="All Exchanges" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="All">All Exchanges</SelectItem>
-                                                    <SelectItem value="NYSE">NYSE</SelectItem>
-                                                    <SelectItem value="NASDAQ">NASDAQ</SelectItem>
-                                                    <SelectItem value="CCC">Crypto (CCC)</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="pt-2 flex justify-end">
-                                            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-xs hover:bg-white/5">
-                                                Clear all
-                                            </Button>
+                                            <h4 className="font-medium text-xs text-muted-foreground uppercase tracking-wider">Exchanges</h4>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {["NYSE", "NASDAQ", "CCC", "XETRA"].map((e) => (
+                                                    <div key={e} className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id={`exch-${e}`}
+                                                            checked={selectedExchanges.includes(e)}
+                                                            onCheckedChange={() => toggleExchange(e)}
+                                                            className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                                        />
+                                                        <label
+                                                            htmlFor={`exch-${e}`}
+                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white/80"
+                                                        >
+                                                            {e}
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
-                                </PopoverContent>
-                            </Popover>
+                                    <DialogFooter>
+                                        <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs hover:bg-white/5 text-muted-foreground">
+                                            Clear all
+                                        </Button>
+                                        <Button size="sm" onClick={() => setIsFilterOpen(false)} className="text-xs">
+                                            Apply Filters
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         </div>
                     </div>
 
@@ -194,61 +278,96 @@ export default function Dashboard() {
                         <Table>
                             <TableHeader className="bg-white/[0.02]">
                                 <TableRow className="hover:bg-transparent border-white/5">
-                                    <TableHead className="w-[100px] text-xs uppercase tracking-wider font-medium text-muted-foreground cursor-pointer hover:text-white transition-colors" onClick={() => handleSort("ticker")}>
+                                    <TableHead className="w-[250px] text-xs uppercase tracking-wider font-medium text-muted-foreground cursor-pointer hover:text-white transition-colors" onClick={() => handleSort("name")}>
                                         <div className="flex items-center gap-1">
-                                            Ticker
-                                            {sortBy === "ticker" && <ArrowUpDown className="h-3 w-3" />}
-                                        </div>
-                                    </TableHead>
-                                    <TableHead className="text-xs uppercase tracking-wider font-medium text-muted-foreground cursor-pointer hover:text-white transition-colors" onClick={() => handleSort("name")}>
-                                        <div className="flex items-center gap-1">
-                                            Name
+                                            Asset Name
                                             {sortBy === "name" && <ArrowUpDown className="h-3 w-3" />}
                                         </div>
                                     </TableHead>
-                                    <TableHead className="w-[120px] text-xs uppercase tracking-wider font-medium text-muted-foreground cursor-pointer hover:text-white transition-colors" onClick={() => handleSort("category")}>
+                                    <TableHead className="w-[100px] text-xs uppercase tracking-wider font-medium text-muted-foreground text-right cursor-pointer hover:text-white transition-colors" onClick={() => handleSort("price")}>
+                                        <div className="flex items-center justify-end gap-1">
+                                            Price
+                                            {sortBy === "price" && <ArrowUpDown className="h-3 w-3" />}
+                                        </div>
+                                    </TableHead>
+                                    <TableHead className="w-[100px] text-xs uppercase tracking-wider font-medium text-muted-foreground text-right cursor-pointer hover:text-white transition-colors" onClick={() => handleSort("change_24h")}>
+                                        <div className="flex items-center justify-end gap-1">
+                                            24h Change
+                                            {sortBy === "change_24h" && <ArrowUpDown className="h-3 w-3" />}
+                                        </div>
+                                    </TableHead>
+                                    <TableHead className="w-[100px] text-xs uppercase tracking-wider font-medium text-muted-foreground hidden md:table-cell">7d Trend</TableHead>
+                                    <TableHead className="w-[120px] text-xs uppercase tracking-wider font-medium text-muted-foreground cursor-pointer hover:text-white transition-colors hidden md:table-cell" onClick={() => handleSort("category")}>
                                         <div className="flex items-center gap-1">
                                             Category
                                             {sortBy === "category" && <ArrowUpDown className="h-3 w-3" />}
                                         </div>
                                     </TableHead>
-                                    <TableHead className="w-[150px] text-xs uppercase tracking-wider font-medium text-muted-foreground hidden md:table-cell">Subcategory</TableHead>
                                     <TableHead className="w-[100px] text-xs uppercase tracking-wider font-medium text-muted-foreground hidden md:table-cell cursor-pointer hover:text-white transition-colors" onClick={() => handleSort("region")}>
                                         <div className="flex items-center gap-1">
                                             Region
                                             {sortBy === "region" && <ArrowUpDown className="h-3 w-3" />}
                                         </div>
                                     </TableHead>
-                                    <TableHead className="w-[80px] text-xs uppercase tracking-wider font-medium text-muted-foreground hidden md:table-cell">Exch</TableHead>
                                     <TableHead className="w-[50px]"></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {assets?.map((asset) => (
-                                    <TableRow
-                                        key={asset.ticker}
-                                        className="group cursor-pointer border-white/5 hover:bg-white/[0.04] transition-colors"
-                                        onDoubleClick={() => router.push(`/asset/${asset.ticker}`)}
-                                    >
-                                        <TableCell className="font-mono text-xs font-medium text-white">{asset.ticker}</TableCell>
-                                        <TableCell className="text-muted-foreground group-hover:text-white transition-colors">{asset.name}</TableCell>
-                                        <TableCell>
-                                            <Badge variant="secondary" className="bg-white/5 hover:bg-white/10 text-muted-foreground border-white/5 text-[10px] font-normal">
-                                                {asset.category}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-xs text-muted-foreground hidden md:table-cell">{asset.subcategory}</TableCell>
-                                        <TableCell className="text-xs text-muted-foreground hidden md:table-cell">{asset.region}</TableCell>
-                                        <TableCell className="text-xs text-muted-foreground hidden md:table-cell">{asset.exchange}</TableCell>
-                                        <TableCell className="text-right p-2">
-                                            <Link href={`/asset/${asset.ticker}`} onClick={(e) => e.stopPropagation()}>
-                                                <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10">
-                                                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
-                                                </Button>
-                                            </Link>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {assets?.map((asset) => {
+                                    const change = asset.change_24h || 0
+                                    const isPositive = change >= 0
+                                    const sparklineData = asset.sparkline_7d ? JSON.parse(asset.sparkline_7d) : []
+                                    const categoryColor = CATEGORY_COLORS[asset.category || ""] || "bg-white/5 text-muted-foreground border-white/5"
+
+                                    return (
+                                        <TableRow
+                                            key={asset.ticker}
+                                            className="group cursor-pointer border-white/5 hover:bg-white/[0.04] transition-colors"
+                                            onClick={() => router.push(`/asset/${asset.ticker}`)}
+                                        >
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    {asset.logo_url ? (
+                                                        <img src={asset.logo_url} alt={asset.ticker} className="h-6 w-6 rounded-full" />
+                                                    ) : (
+                                                        <div className="h-6 w-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white/50">
+                                                            {asset.ticker.substring(0, 1)}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium text-sm text-white">{asset.name}</span>
+                                                        <span className="text-xs text-muted-foreground font-mono">{asset.ticker}</span>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right font-mono text-sm text-white">
+                                                {asset.price ? `$${asset.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "-"}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className={cn("flex items-center justify-end gap-1 font-mono text-xs", isPositive ? "text-emerald-400" : "text-rose-400")}>
+                                                    {change !== 0 && (isPositive ? "+" : "")}
+                                                    {change.toFixed(2)}%
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="hidden md:table-cell py-2">
+                                                <Sparkline data={sparklineData} color={isPositive ? "#34d399" : "#fb7185"} />
+                                            </TableCell>
+                                            <TableCell className="hidden md:table-cell">
+                                                <Badge variant="secondary" className={cn("text-[10px] font-normal border", categoryColor)}>
+                                                    {asset.category}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground hidden md:table-cell">{asset.region}</TableCell>
+                                            <TableCell className="text-right p-2">
+                                                <Link href={`/asset/${asset.ticker}`} onClick={(e) => e.stopPropagation()}>
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10">
+                                                        <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    </Button>
+                                                </Link>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
                                 {assets?.length === 0 && (
                                     <TableRow>
                                         <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">

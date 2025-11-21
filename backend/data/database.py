@@ -41,6 +41,11 @@ class AssetDatabase:
                 currency TEXT,
                 exchange TEXT,
                 coingecko_id TEXT,
+                logo_url TEXT,
+                price REAL,
+                change_24h REAL,
+                sparkline_7d TEXT,
+                last_updated DATETIME,
                 active BOOLEAN DEFAULT 1
             )
         """)
@@ -62,7 +67,11 @@ class AssetDatabase:
         """
         conn = self._get_conn()
         # Ensure columns match
-        expected_cols = ['ticker', 'name', 'category', 'subcategory', 'region', 'currency', 'exchange', 'coingecko_id']
+        expected_cols = [
+            'ticker', 'name', 'category', 'subcategory', 'region', 
+            'currency', 'exchange', 'coingecko_id', 'logo_url', 
+            'price', 'change_24h', 'sparkline_7d', 'last_updated'
+        ]
         for col in expected_cols:
             if col not in assets_df.columns:
                 assets_df[col] = None
@@ -71,21 +80,35 @@ class AssetDatabase:
         # but for this use case (re-populating), 'append' or manual upsert is better.
         # We'll use a loop for upsert to handle updates correctly.
         
+        # Convert Timestamp to string for SQLite
+        if 'last_updated' in assets_df.columns:
+            assets_df['last_updated'] = assets_df['last_updated'].astype(str)
+            
         data = assets_df[expected_cols].to_dict('records')
         
         cursor = conn.cursor()
         
-        # Check if column exists (migration hack for dev)
+        # Check if columns exist (migration hack for dev)
         try:
-            cursor.execute("SELECT coingecko_id FROM assets LIMIT 1")
+            cursor.execute("SELECT logo_url FROM assets LIMIT 1")
         except sqlite3.OperationalError:
-            logger.info("Migrating database: Adding coingecko_id column")
-            cursor.execute("ALTER TABLE assets ADD COLUMN coingecko_id TEXT")
+            logger.info("Migrating database: Adding new columns")
+            cursor.execute("ALTER TABLE assets ADD COLUMN logo_url TEXT")
+            cursor.execute("ALTER TABLE assets ADD COLUMN price REAL")
+            cursor.execute("ALTER TABLE assets ADD COLUMN change_24h REAL")
+            cursor.execute("ALTER TABLE assets ADD COLUMN sparkline_7d TEXT")
+            cursor.execute("ALTER TABLE assets ADD COLUMN last_updated DATETIME")
             conn.commit()
             
         cursor.executemany("""
-            INSERT OR REPLACE INTO assets (ticker, name, category, subcategory, region, currency, exchange, coingecko_id)
-            VALUES (:ticker, :name, :category, :subcategory, :region, :currency, :exchange, :coingecko_id)
+            INSERT OR REPLACE INTO assets (
+                ticker, name, category, subcategory, region, currency, exchange, coingecko_id,
+                logo_url, price, change_24h, sparkline_7d, last_updated
+            )
+            VALUES (
+                :ticker, :name, :category, :subcategory, :region, :currency, :exchange, :coingecko_id,
+                :logo_url, :price, :change_24h, :sparkline_7d, :last_updated
+            )
         """, data)
         
         conn.commit()
@@ -200,7 +223,10 @@ class AssetDatabase:
             params.append(exchange)
             
         # Whitelist sort columns to prevent SQL injection
-        valid_sort_cols = ["ticker", "name", "category", "subcategory", "region", "exchange"]
+        valid_sort_cols = [
+            "ticker", "name", "category", "subcategory", "region", "exchange",
+            "price", "change_24h", "last_updated"
+        ]
         if sort_by in valid_sort_cols:
             order = "DESC" if sort_order.lower() == "desc" else "ASC"
             query += f" ORDER BY {sort_by} {order}"

@@ -8,6 +8,11 @@ export interface Asset {
   region: string | null;
   currency: string | null;
   exchange: string | null;
+  logo_url?: string | null;
+  price?: number | null;
+  change_24h?: number | null;
+  sparkline_7d?: string | null;
+  last_updated?: string | null;
 }
 
 export interface AssetHistory {

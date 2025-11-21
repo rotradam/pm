@@ -12,12 +12,17 @@ price_fetcher = PriceFetcher()
 # Pydantic Models
 class Asset(BaseModel):
     ticker: str
-    name: Optional[str]
-    category: Optional[str]
-    subcategory: Optional[str]
-    region: Optional[str]
-    currency: Optional[str]
-    exchange: Optional[str]
+    name: Optional[str] = None
+    category: Optional[str] = None
+    subcategory: Optional[str] = None
+    region: Optional[str] = None
+    currency: Optional[str] = None
+    exchange: Optional[str] = None
+    logo_url: Optional[str] = None
+    price: Optional[float] = None
+    change_24h: Optional[float] = None
+    sparkline_7d: Optional[str] = None
+    last_updated: Optional[str] = None
 
 class AssetHistory(BaseModel):
     date: str
