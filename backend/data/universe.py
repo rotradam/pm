@@ -6,9 +6,11 @@ Reads and validates the curated universe CSV and provides filtering capabilities
 
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import pandas as pd
+
+from .database import AssetDatabase
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,9 @@ class Universe:
         # Store manually added tickers
         self.manual_tickers = []
         
+        # Initialize database
+        self.db = AssetDatabase()
+        
         logger.info(f"Loaded universe with {len(self.df)} instruments across "
                    f"{self.df['sector'].nunique()} sectors")
     
@@ -61,14 +66,43 @@ class Universe:
             self.df = self.df.dropna(subset=["isin"])
     
     def get_all(self) -> pd.DataFrame:
-        """Return the full universe DataFrame, including manual tickers."""
-        df = self.df.copy()
+        """
+        Get the full universe as a DataFrame.
+        Combines CSV universe, manual tickers, and DB assets.
+        """
+        # 1. Start with CSV universe
+        combined_df = self.df.copy()
         
+        # 2. Add DB assets
+        try:
+            db_assets = self.db.get_all_assets()
+            if not db_assets.empty:
+                # Map DB columns to Universe columns if needed, or just concat
+                # Universe columns: sector, name, isin, wkn, notes
+                # DB columns: ticker, name, category, subcategory, region, currency, exchange
+                
+                # We'll treat 'category' as 'sector'
+                db_mapped = pd.DataFrame({
+                    'sector': db_assets['category'],
+                    'name': db_assets['name'],
+                    'isin': db_assets['ticker'], # Using ticker as ISIN for now
+                    'wkn': db_assets['ticker'],
+                    'notes': db_assets['subcategory']
+                })
+                
+                combined_df = pd.concat([combined_df, db_mapped], ignore_index=True)
+        except Exception as e:
+            logger.error(f"Error fetching assets from DB: {e}")
+        
+        # 3. Add manual tickers
         if self.manual_tickers:
             manual_df = pd.DataFrame(self.manual_tickers)
-            df = pd.concat([df, manual_df], ignore_index=True)
+            combined_df = pd.concat([combined_df, manual_df], ignore_index=True)
             
-        return df
+        # Deduplicate by ISIN (Ticker)
+        combined_df = combined_df.drop_duplicates(subset=['isin'], keep='last')
+            
+        return combined_df
 
     def add_manual_tickers(self, tickers: List[str]):
         """
