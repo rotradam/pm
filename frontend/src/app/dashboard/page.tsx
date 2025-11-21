@@ -1,14 +1,18 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { fetchAssets, Asset } from "@/lib/api"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
 import { Search, Filter, ChevronLeft, ChevronRight, Layers, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 
 export default function Dashboard() {
+    const router = useRouter()
     const [search, setSearch] = useState("")
     const [page, setPage] = useState(0)
     const limit = 20
@@ -85,47 +89,53 @@ export default function Dashboard() {
                             Error loading assets. Please try again.
                         </div>
                     ) : (
-                        <div className="relative w-full overflow-auto">
-                            <table className="w-full caption-bottom text-sm text-left">
-                                <thead className="[&_tr]:border-b [&_tr]:border-white/5">
-                                    <tr className="border-b border-white/5 transition-colors hover:bg-white/[0.02]">
-                                        <th className="h-10 px-4 align-middle font-medium text-muted-foreground text-xs uppercase tracking-wider w-[120px]">Ticker</th>
-                                        <th className="h-10 px-4 align-middle font-medium text-muted-foreground text-xs uppercase tracking-wider">Name</th>
-                                        <th className="h-10 px-4 align-middle font-medium text-muted-foreground text-xs uppercase tracking-wider w-[150px]">Category</th>
-                                        <th className="h-10 px-4 align-middle font-medium text-muted-foreground text-xs uppercase tracking-wider w-[150px]">Region</th>
-                                        <th className="h-10 px-4 align-middle font-medium text-muted-foreground text-xs uppercase tracking-wider text-right w-[100px]"></th>
-                                    </tr>
-                                </thead>
-                                <tbody className="[&_tr:last-child]:border-0 divide-y divide-white/5">
-                                    {assets?.map((asset) => (
-                                        <tr key={asset.ticker} className="group transition-colors hover:bg-white/[0.04]">
-                                            <td className="p-4 align-middle font-medium text-white font-mono text-xs">{asset.ticker}</td>
-                                            <td className="p-4 align-middle text-muted-foreground group-hover:text-white transition-colors">{asset.name}</td>
-                                            <td className="p-4 align-middle">
-                                                <span className="inline-flex items-center rounded-md border border-white/5 bg-white/5 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                                    {asset.category}
-                                                </span>
-                                            </td>
-                                            <td className="p-4 align-middle text-muted-foreground text-xs">{asset.region}</td>
-                                            <td className="p-4 align-middle text-right">
-                                                <Link href={`/asset/${asset.ticker}`} className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-white/10">
-                                                        <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-                                                    </Button>
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {assets?.length === 0 && (
-                                        <tr>
-                                            <td colSpan={5} className="p-12 text-center text-muted-foreground text-sm">
-                                                No assets found matching your search.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                        <Table>
+                            <TableHeader className="bg-white/[0.02]">
+                                <TableRow className="hover:bg-transparent border-white/5">
+                                    <TableHead className="w-[100px] text-xs uppercase tracking-wider font-medium text-muted-foreground">Ticker</TableHead>
+                                    <TableHead className="text-xs uppercase tracking-wider font-medium text-muted-foreground">Name</TableHead>
+                                    <TableHead className="w-[120px] text-xs uppercase tracking-wider font-medium text-muted-foreground">Category</TableHead>
+                                    <TableHead className="w-[150px] text-xs uppercase tracking-wider font-medium text-muted-foreground hidden md:table-cell">Subcategory</TableHead>
+                                    <TableHead className="w-[100px] text-xs uppercase tracking-wider font-medium text-muted-foreground hidden md:table-cell">Region</TableHead>
+                                    <TableHead className="w-[80px] text-xs uppercase tracking-wider font-medium text-muted-foreground hidden md:table-cell">Exch</TableHead>
+                                    <TableHead className="w-[50px]"></TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {assets?.map((asset) => (
+                                    <TableRow
+                                        key={asset.ticker}
+                                        className="group cursor-pointer border-white/5 hover:bg-white/[0.04] transition-colors"
+                                        onDoubleClick={() => router.push(`/asset/${asset.ticker}`)}
+                                    >
+                                        <TableCell className="font-mono text-xs font-medium text-white">{asset.ticker}</TableCell>
+                                        <TableCell className="text-muted-foreground group-hover:text-white transition-colors">{asset.name}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="secondary" className="bg-white/5 hover:bg-white/10 text-muted-foreground border-white/5 text-[10px] font-normal">
+                                                {asset.category}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-xs text-muted-foreground hidden md:table-cell">{asset.subcategory}</TableCell>
+                                        <TableCell className="text-xs text-muted-foreground hidden md:table-cell">{asset.region}</TableCell>
+                                        <TableCell className="text-xs text-muted-foreground hidden md:table-cell">{asset.exchange}</TableCell>
+                                        <TableCell className="text-right p-2">
+                                            <Link href={`/asset/${asset.ticker}`} onClick={(e) => e.stopPropagation()}>
+                                                <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10">
+                                                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
+                                                </Button>
+                                            </Link>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                {assets?.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                                            No assets found matching your search.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
                     )}
 
                     <div className="flex items-center justify-between border-t border-white/5 px-4 py-3 bg-white/[0.02]">
