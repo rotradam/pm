@@ -40,6 +40,7 @@ class AssetDatabase:
                 region TEXT,
                 currency TEXT,
                 exchange TEXT,
+                coingecko_id TEXT,
                 active BOOLEAN DEFAULT 1
             )
         """)
@@ -61,7 +62,7 @@ class AssetDatabase:
         """
         conn = self._get_conn()
         # Ensure columns match
-        expected_cols = ['ticker', 'name', 'category', 'subcategory', 'region', 'currency', 'exchange']
+        expected_cols = ['ticker', 'name', 'category', 'subcategory', 'region', 'currency', 'exchange', 'coingecko_id']
         for col in expected_cols:
             if col not in assets_df.columns:
                 assets_df[col] = None
@@ -73,9 +74,18 @@ class AssetDatabase:
         data = assets_df[expected_cols].to_dict('records')
         
         cursor = conn.cursor()
+        
+        # Check if column exists (migration hack for dev)
+        try:
+            cursor.execute("SELECT coingecko_id FROM assets LIMIT 1")
+        except sqlite3.OperationalError:
+            logger.info("Migrating database: Adding coingecko_id column")
+            cursor.execute("ALTER TABLE assets ADD COLUMN coingecko_id TEXT")
+            conn.commit()
+            
         cursor.executemany("""
-            INSERT OR REPLACE INTO assets (ticker, name, category, subcategory, region, currency, exchange)
-            VALUES (:ticker, :name, :category, :subcategory, :region, :currency, :exchange)
+            INSERT OR REPLACE INTO assets (ticker, name, category, subcategory, region, currency, exchange, coingecko_id)
+            VALUES (:ticker, :name, :category, :subcategory, :region, :currency, :exchange, :coingecko_id)
         """, data)
         
         conn.commit()

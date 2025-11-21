@@ -42,7 +42,8 @@ def fetch_crypto_assets():
                     "subcategory": "Top 500",
                     "region": "Global",
                     "currency": "USD",
-                    "exchange": "CCC" # CryptoCompare/CoinGecko generic
+                    "exchange": "CCC", # CryptoCompare/CoinGecko generic
+                    "coingecko_id": coin['id']
                 })
         except Exception as e:
             logger.error(f"Error fetching crypto page {page}: {e}")
