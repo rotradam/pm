@@ -5,34 +5,34 @@
 
 @layer base {
   :root {
-    /* Linear-like Dark Theme by default */
-    --background: 240 10% 3.9%; /* #09090b */
+    /* Permanent Green Theme */
+    --background: 145 80% 10%; /* #052e16 */
     --foreground: 0 0% 98%;
     
-    --card: 240 10% 3.9%;
+    --card: 145 80% 12%;
     --card-foreground: 0 0% 98%;
  
-    --popover: 240 10% 3.9%;
+    --popover: 145 80% 12%;
     --popover-foreground: 0 0% 98%;
  
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary: 142 70% 50%;
+    --primary-foreground: 145 85% 5%;
  
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 145 30% 20%;
     --secondary-foreground: 0 0% 98%;
  
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 145 30% 20%;
+    --muted-foreground: 145 20% 65%;
  
-    --accent: 240 3.7% 15.9%;
+    --accent: 145 30% 20%;
     --accent-foreground: 0 0% 98%;
  
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
  
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 145 30% 20%;
+    --input: 145 30% 20%;
+    --ring: 142 70% 50%;
  
     --radius: 0.5rem;
   }
