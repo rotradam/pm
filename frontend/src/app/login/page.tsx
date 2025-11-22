@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Chrome, Loader2, ArrowRight, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
     Dialog,
     DialogContent,
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/dialog"
 
 export default function LoginPage() {
+    const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [resetEmail, setResetEmail] = useState("")
     const [isResetOpen, setIsResetOpen] = useState(false)
@@ -41,8 +43,13 @@ export default function LoginPage() {
     const handleLogin = async (formData: FormData) => {
         setIsLoading(true)
         try {
-            await login(formData)
-            toast.success("Logged in successfully")
+            const result = await login(formData)
+            if (result?.error) {
+                toast.error(result.error)
+            } else {
+                toast.success("Logged in successfully")
+                router.push('/dashboard')
+            }
         } catch (e) {
             toast.error("Login failed. Please check your credentials.")
         } finally {
@@ -53,8 +60,13 @@ export default function LoginPage() {
     const handleSignup = async (formData: FormData) => {
         setIsLoading(true)
         try {
-            await signup(formData)
-            toast.success("Signup successful! Please check your email to confirm.")
+            const result = await signup(formData)
+            if (result?.error) {
+                toast.error(result.error)
+            } else {
+                toast.success("Signup successful! Please check your email to confirm.")
+                router.push('/dashboard')
+            }
         } catch (e) {
             toast.error("Signup failed. Please try again.")
         } finally {

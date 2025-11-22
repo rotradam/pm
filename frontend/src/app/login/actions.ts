@@ -24,9 +24,6 @@ export async function login(formData: FormData) {
     
     if (profile && profile.email) {
       email = profile.email
-    } else {
-      // If username not found, we can either fail here or let signInWithPassword fail
-      // Letting it fail with the username as email will result in invalid login, which is fine
     }
   }
 
@@ -37,13 +34,11 @@ export async function login(formData: FormData) {
 
   if (error) {
     console.error(error)
-    // We should probably return the error to the client instead of redirecting
-    // But for now, keeping existing behavior but maybe we can improve it later
-    redirect('/login?error=Invalid login credentials')
+    return { error: error.message }
   }
 
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  return { success: true }
 }
 
 export async function signup(formData: FormData) {
@@ -66,11 +61,11 @@ export async function signup(formData: FormData) {
 
   if (error) {
     console.error(error)
-    redirect('/login?error=Signup failed')
+    return { error: error.message }
   }
 
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  return { success: true }
 }
 
 export async function signOut() {
