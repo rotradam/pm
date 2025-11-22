@@ -22,6 +22,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { SettingsModal } from "@/components/settings-modal"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { LogOut, Settings as SettingsIcon } from "lucide-react"
+import { signOut } from "../login/actions"
 
 // Simple Sparkline Component
 function Sparkline({ data, color = "#10b981" }: { data: number[], color?: string }) {
@@ -174,19 +185,33 @@ export default function Dashboard() {
                             <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/5" onClick={() => refetch()}>
                                 <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                             </Button>
-                            <SettingsModal>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/5">
-                                    <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden">
-                                        {userProfile?.avatar_url ? (
-                                            <img src={userProfile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
-                                        ) : userProfile?.full_name ? (
-                                            <span className="text-[10px] font-bold text-white">{userProfile.full_name.charAt(0)}</span>
-                                        ) : (
-                                            <div className="h-2 w-2 rounded-full bg-white/50" />
-                                        )}
-                                    </div>
-                                </Button>
-                            </SettingsModal>
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/5">
+                                        <Avatar className="h-6 w-6">
+                                            <AvatarImage src={userProfile?.avatar_url} />
+                                            <AvatarFallback className="text-[10px] bg-white/10 text-white/70">
+                                                {userProfile?.full_name?.charAt(0) || "U"}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56 bg-[#0F1011] border-white/10 text-foreground">
+                                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                                    <DropdownMenuSeparator className="bg-white/10" />
+                                    <SettingsModal>
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer hover:bg-white/5 focus:bg-white/5">
+                                            <SettingsIcon className="mr-2 h-4 w-4" />
+                                            <span>Settings</span>
+                                        </DropdownMenuItem>
+                                    </SettingsModal>
+                                    <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer hover:bg-white/5 focus:bg-white/5 text-red-500 focus:text-red-500">
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        <span>Sign out</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
                 </div>
@@ -441,6 +466,6 @@ export default function Dashboard() {
                     </div>
                 </div>
             </main>
-        </div>
+        </div >
     )
 }

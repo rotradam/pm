@@ -55,14 +55,14 @@ export default function LoginPage() {
                         <CardHeader>
                             <CardTitle>Login</CardTitle>
                             <CardDescription>
-                                Enter your email below to login to your account.
+                                Enter your email or username below to login to your account.
                             </CardDescription>
                         </CardHeader>
                         <form action={handleLogin}>
                             <CardContent className="space-y-2">
                                 <div className="space-y-1">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input id="email" name="email" type="email" required />
+                                    <Label htmlFor="email">Email or Username</Label>
+                                    <Input id="email" name="email" type="text" required />
                                 </div>
                                 <div className="space-y-1">
                                     <Label htmlFor="password">Password</Label>
@@ -96,6 +96,10 @@ export default function LoginPage() {
                         </CardHeader>
                         <form action={handleSignup}>
                             <CardContent className="space-y-2">
+                                <div className="space-y-1">
+                                    <Label htmlFor="fullName">Full Name</Label>
+                                    <Input id="fullName" name="fullName" type="text" required />
+                                </div>
                                 <div className="space-y-1">
                                     <Label htmlFor="email">Email</Label>
                                     <Input id="email" name="email" type="email" required />
