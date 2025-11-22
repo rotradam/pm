@@ -1,11 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { fetchAssetDetails, fetchAssetHistory } from "@/lib/api"
+import { fetchAssetDetails, fetchAssetHistory, fetchAssetSources } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, TrendingUp, TrendingDown, Layers } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
     ResponsiveContainer,
     AreaChart,
@@ -19,15 +21,21 @@ import {
 export default function AssetPage() {
     const params = useParams()
     const ticker = params.ticker as string
+    const [selectedSource, setSelectedSource] = useState<string | undefined>(undefined)
 
     const { data: asset, isLoading: isAssetLoading } = useQuery({
         queryKey: ['asset', ticker],
         queryFn: () => fetchAssetDetails(ticker)
     })
 
+    const { data: sources } = useQuery({
+        queryKey: ['sources', ticker],
+        queryFn: () => fetchAssetSources(ticker)
+    })
+
     const { data: history, isLoading: isHistoryLoading } = useQuery({
-        queryKey: ['history', ticker],
-        queryFn: () => fetchAssetHistory(ticker, "1y")
+        queryKey: ['history', ticker, selectedSource],
+        queryFn: () => fetchAssetHistory(ticker, "1y", selectedSource)
     })
 
     if (isAssetLoading || isHistoryLoading) {
@@ -110,7 +118,20 @@ export default function AssetPage() {
                 <div className="rounded-xl border border-white/5 bg-white/[0.02] p-6 mb-8">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-sm font-medium text-muted-foreground">Price History (1Y)</h3>
-                        {/* Time range selector could go here */}
+                        <div className="flex items-center gap-2">
+                            <Select value={selectedSource} onValueChange={setSelectedSource}>
+                                <SelectTrigger className="w-[140px] h-8 text-xs bg-white/5 border-white/10">
+                                    <SelectValue placeholder="Select Source" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#0F1011] border-white/10 text-white">
+                                    {sources?.map(s => (
+                                        <SelectItem key={s.id} value={s.id} className="text-xs focus:bg-white/10 focus:text-white cursor-pointer">
+                                            {s.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                     <div className="h-[400px] w-full">
                         {history && history.length > 0 ? (

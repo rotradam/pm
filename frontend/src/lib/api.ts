@@ -1,6 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 export interface Asset {
+  id: string; // Added id
   ticker: string;
   name: string | null;
   category: string | null;
@@ -56,8 +57,16 @@ export async function fetchAssetDetails(ticker: string): Promise<Asset> {
   return res.json();
 }
 
-export async function fetchAssetHistory(ticker: string, period: string = "1y"): Promise<AssetHistory[]> {
-  const res = await fetch(`${API_URL}/assets/${ticker}/history?period=${period}`);
+export async function fetchAssetHistory(ticker: string, period: string = "1y", source?: string): Promise<AssetHistory[]> {
+  let url = `${API_URL}/assets/${ticker}/history?period=${period}`;
+  if (source) url += `&source=${source}`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch asset history");
+  return res.json();
+}
+
+export async function fetchAssetSources(ticker: string): Promise<{id: string, name: string, type: string}[]> {
+  const res = await fetch(`${API_URL}/assets/${ticker}/sources`);
+  if (!res.ok) throw new Error("Failed to fetch asset sources");
   return res.json();
 }

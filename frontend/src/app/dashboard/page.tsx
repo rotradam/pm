@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
+
 import { useRouter } from "next/navigation"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { fetchAssets, Asset } from "@/lib/api"
+import { createClient } from "@/lib/supabase/client"
+import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -19,6 +21,7 @@ import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
+import { SettingsModal } from "@/components/settings-modal"
 
 // Simple Sparkline Component
 function Sparkline({ data, color = "#10b981" }: { data: number[], color?: string }) {
@@ -63,6 +66,23 @@ export default function Dashboard() {
     const [search, setSearch] = useState("")
     const [page, setPage] = useState(0)
     const [category, setCategory] = useState("All")
+    const [userProfile, setUserProfile] = useState<any>(null)
+
+    useEffect(() => {
+        const getUser = async () => {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single()
+                setUserProfile(profile)
+            }
+        }
+        getUser()
+    }, [])
 
     // Advanced Filters State
     const [selectedRegions, setSelectedRegions] = useState<string[]>([])
@@ -133,6 +153,9 @@ export default function Dashboard() {
                         </div>
                         <span>Portfolio<span className="text-muted-foreground">Builder</span></span>
                     </Link>
+                    {userProfile && (
+                        <span className="text-xs text-muted-foreground ml-4">Welcome, {userProfile.full_name || 'User'}</span>
+                    )}
                     <div className="flex items-center gap-4">
                         <div className="relative w-64 hidden md:block group">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-white transition-colors" />
@@ -149,9 +172,21 @@ export default function Dashboard() {
                         <div className="h-6 w-[1px] bg-white/10 mx-2"></div>
                         <div className="flex items-center gap-2">
                             <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/5" onClick={() => refetch()}>
-                                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" /> {/* Using ArrowUpDown as refresh icon placeholder or import RefreshCw */}
+                                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                             </Button>
-                            <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500"></div>
+                            <SettingsModal>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/5">
+                                    <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden">
+                                        {userProfile?.avatar_url ? (
+                                            <img src={userProfile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
+                                        ) : userProfile?.full_name ? (
+                                            <span className="text-[10px] font-bold text-white">{userProfile.full_name.charAt(0)}</span>
+                                        ) : (
+                                            <div className="h-2 w-2 rounded-full bg-white/50" />
+                                        )}
+                                    </div>
+                                </Button>
+                            </SettingsModal>
                         </div>
                     </div>
                 </div>

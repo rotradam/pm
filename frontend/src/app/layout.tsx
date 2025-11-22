@@ -10,6 +10,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
 import { SearchCommand } from "@/components/search-command";
 
+import { Toaster } from "@/components/ui/sonner"
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -23,6 +25,7 @@ export default function RootLayout({
                 <QueryClientProvider client={queryClient}>
                     <SearchCommand />
                     {children}
+                    <Toaster />
                 </QueryClientProvider>
             </body>
         </html>

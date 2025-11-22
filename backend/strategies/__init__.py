@@ -10,14 +10,7 @@ from .momentum import ExponentialGradient, UniversalPortfolio
 from .mean_reversion import OLMAR, PAMR, CWMR, RMR
 from .correlation_driven import CORN, CORNK, CORNU
 from .follow_the_leader import BCRP, BestStock, FTL, FTRL
-from .dtc import DTC
-from .skfolio_adapter import SkfolioAdapter
-from skfolio.optimization import MeanRisk
 
-
-# Strategy Registry
-# Maps strategy ID to strategy class
-from .waeg import WAEGStrategy
 
 # Strategy Registry
 # Maps strategy ID to strategy class
@@ -30,7 +23,6 @@ STRATEGY_REGISTRY = {
     # Momentum strategies
     'EG': ExponentialGradient,
     'UP': UniversalPortfolio,
-    'WAEG': WAEGStrategy,
     
     # Mean reversion strategies
     'OLMAR': OLMAR,
@@ -48,9 +40,6 @@ STRATEGY_REGISTRY = {
     'BestStock': BestStock,
     'FTL': FTL,
     'FTRL': FTRL,
-    
-    # Decentralized strategies
-    'DTC': DTC,
 }
 
 
@@ -67,15 +56,6 @@ def get_strategy(strategy_id: str) -> OlpsStrategy:
     Raises:
         ValueError: If strategy_id not found
     """
-    if strategy_id == 'MV':
-        return SkfolioAdapter(
-            estimator_cls=MeanRisk,
-            estimator_kwargs={},
-            id="MV",
-            name="Mean-Variance (skfolio)",
-            description="Classic Mean-Variance optimization using skfolio."
-        )
-
     if strategy_id not in STRATEGY_REGISTRY:
         available = ', '.join(STRATEGY_REGISTRY.keys())
         raise ValueError(
@@ -107,23 +87,6 @@ def list_strategies():
             'description': strategy.description if hasattr(strategy, 'description') else '',
             'implementable': strategy.implementable if hasattr(strategy, 'implementable') else True,
         })
-    
-    # Add skfolio strategies manually for now
-    mv = SkfolioAdapter(
-        estimator_cls=MeanRisk,
-        estimator_kwargs={},
-        id="MV",
-        name="Mean-Variance (skfolio)",
-        description="Classic Mean-Variance optimization using skfolio."
-    )
-    strategies.append(mv.to_dict())
-    strategies[-1].update({
-        'strategy_type': mv.strategy_type.value,
-        'complexity': mv.complexity.value,
-        'description': mv.description,
-        'implementable': mv.implementable
-    })
-    
     return strategies
 
 
@@ -139,7 +102,7 @@ def get_strategies_by_type(strategy_type: str):
     """
     type_mapping = {
         'baseline': ['EW', 'BAH', 'CRP'],
-        'momentum': ['EG', 'UP', 'WAEG'],
+        'momentum': ['EG', 'UP'],
         'mean_reversion': ['OLMAR', 'PAMR'],
     }
     
@@ -165,11 +128,8 @@ __all__ = [
     'ConstantRebalancedPortfolio',
     'ExponentialGradient',
     'UniversalPortfolio',
-    'WAEGStrategy',
     'OLMAR',
     'PAMR',
-    'DTC',
-    'SkfolioAdapter',
     
     # Registry functions
     'STRATEGY_REGISTRY',

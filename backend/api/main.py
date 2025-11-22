@@ -1,6 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from backend.api.routes import assets
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path="backend/.env")
+
+from backend.api.routers import assets
+from backend.api.dependencies import get_current_user
 
 app = FastAPI(
     title="Portfolio Management API",
@@ -18,8 +25,12 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(assets.router, prefix="/api/assets", tags=["assets"])
+app.include_router(assets.router, prefix="/api", tags=["assets"])
 
 @app.get("/")
 async def root():
     return {"message": "Portfolio Management API is running"}
+
+@app.get("/api/me")
+async def read_users_me(user = Depends(get_current_user)):
+    return {"user_id": user.id, "email": user.email}
