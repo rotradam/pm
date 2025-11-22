@@ -106,22 +106,31 @@ export default function Dashboard() {
     const limit = 20
 
     // Derived filters for API
-    const regionFilter = selectedRegions.length > 0 ? selectedRegions[0] : undefined // API currently supports single region, need to update API for multi or just pick first for now
+    const regionFilter = selectedRegions.length > 0 ? selectedRegions[0] : undefined
     const exchangeFilter = selectedExchanges.length > 0 ? selectedExchanges[0] : undefined
 
+    // Check if user has selected any exchanges
+    const hasSelectedExchanges = userProfile?.preferred_exchanges && userProfile.preferred_exchanges.length > 0
+
     const { data: assets, isLoading, isError, refetch } = useQuery<Asset[]>({
-        queryKey: ['assets', search, category, regionFilter, exchangeFilter, sortBy, sortOrder, page],
-        queryFn: () => fetchAssets(
-            search,
-            category === "All" ? undefined : category,
-            limit,
-            page * limit,
-            regionFilter,
-            exchangeFilter,
-            sortBy,
-            sortOrder
-        ),
-        placeholderData: keepPreviousData
+        queryKey: ['assets', search, category, regionFilter, exchangeFilter, sortBy, sortOrder, page, userProfile?.preferred_exchanges],
+        queryFn: () => {
+            // If no preferences set, don't fetch anything (or return empty)
+            if (!hasSelectedExchanges && !search) return []
+
+            return fetchAssets(
+                search,
+                category === "All" ? undefined : category,
+                limit,
+                page * limit,
+                regionFilter,
+                exchangeFilter, // This is the UI filter
+                sortBy,
+                sortOrder
+            )
+        },
+        placeholderData: keepPreviousData,
+        enabled: !!userProfile // Only fetch when profile is loaded
     })
 
     const handleSort = (column: string) => {
@@ -430,8 +439,27 @@ export default function Dashboard() {
                                 })}
                                 {assets?.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                                            No assets found matching your search.
+                                        <TableCell colSpan={7} className="h-64 text-center">
+                                            {!hasSelectedExchanges && !search ? (
+                                                <div className="flex flex-col items-center justify-center space-y-4">
+                                                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                                        <Layers className="h-6 w-6 text-primary" />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <h3 className="text-lg font-medium text-white">Select Asset Universe</h3>
+                                                        <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                                                            Connect to exchanges to populate your dashboard with real-time market data.
+                                                        </p>
+                                                    </div>
+                                                    <SettingsModal>
+                                                        <Button>
+                                                            Connect Exchanges
+                                                        </Button>
+                                                    </SettingsModal>
+                                                </div>
+                                            ) : (
+                                                <span className="text-muted-foreground">No assets found matching your search.</span>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 )}
